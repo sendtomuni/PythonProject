@@ -1,4 +1,4 @@
-str1, str2 = 'key', 'bee'
+str1, str2 = 'uff', 'bee'
 
 flag = True
 
@@ -17,6 +17,7 @@ else:
             break
         else:
             map2[str2[i]] = str1[i]
+print(map1, map2)
 
 # Print result
 if flag:
