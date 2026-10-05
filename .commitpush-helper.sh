@@ -1,11 +1,58 @@
 #!/bin/bash
-# commitpush helper script - generates meaningful commits and PRs based on changes
+# commitpush helper script - commits, pushes to both remotes (GitHub + GitLab),
+# and creates/updates the GitHub PR and GitLab MR for the current dated branch.
+#
+# The commit message and PR/MR title+body are NOT generated here. They must be
+# authored by whoever is driving this script (e.g. Claude reading the actual
+# diff) and passed in explicitly, so they reflect the real intent of the
+# change instead of a grep-based guess.
+#
+# Usage:
+#   .commitpush-helper.sh -m "<commit message>" [-t "<pr/mr title>"] -b "<pr/mr body>"
+#   .commitpush-helper.sh -m "<commit message>" [-t "<pr/mr title>"] -f <path-to-body-file>
+#
+#   -m   Commit message (required, first line is used as the summary everywhere a
+#        short title is needed).
+#   -t   PR/MR title (optional, defaults to the commit message).
+#   -b   PR/MR body/description text (required unless -f is given).
+#   -f   Path to a file containing the PR/MR body/description (use this for
+#        multi-line descriptions instead of -b).
 
 set -e
 
+usage() {
+    echo "Usage: $0 -m \"<commit message>\" [-t \"<pr/mr title>\"] (-b \"<body>\" | -f <body-file>)" >&2
+    exit 1
+}
+
+COMMIT_MSG=""
+PR_TITLE=""
+PR_BODY=""
+BODY_FILE=""
+
+while getopts "m:t:b:f:h" opt; do
+    case "$opt" in
+        m) COMMIT_MSG="$OPTARG" ;;
+        t) PR_TITLE="$OPTARG" ;;
+        b) PR_BODY="$OPTARG" ;;
+        f) BODY_FILE="$OPTARG" ;;
+        h) usage ;;
+        *) usage ;;
+    esac
+done
+
+[ -z "$COMMIT_MSG" ] && usage
+
+if [ -n "$BODY_FILE" ]; then
+    [ -f "$BODY_FILE" ] || { echo "Body file not found: $BODY_FILE" >&2; exit 1; }
+    PR_BODY=$(cat "$BODY_FILE")
+fi
+
+[ -z "$PR_BODY" ] && usage
+[ -z "$PR_TITLE" ] && PR_TITLE="$COMMIT_MSG"
+
 BRANCH_DATE=$(date +%d-%m-%Y)
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-PROJECT_NAME="PythonProject"
 
 # Switch to dated branch if needed
 if [ "$CURRENT_BRANCH" != "$BRANCH_DATE" ]; then
@@ -16,132 +63,18 @@ fi
 # Stage all changes
 git add -A
 
-# Get a summary of changes
-CHANGES=$(git diff --cached --name-only)
-CHANGES_COUNT=$(echo "$CHANGES" | grep -c . || echo "0")
-
-if [ "$CHANGES_COUNT" -eq 0 ]; then
+if git diff --cached --quiet; then
     echo "ℹ️ Nothing to commit"
     exit 0
 fi
 
-# Generate file summary for commit message
-FILES_SUMMARY=$(echo "$CHANGES" | head -5 | tr '\n' ', ' | sed 's/,$//')
-if [ "$CHANGES_COUNT" -gt 5 ]; then
-    FILES_SUMMARY="$FILES_SUMMARY, and $((CHANGES_COUNT - 5)) more file(s)"
-fi
-
-# Get change statistics
-INSERTIONS=$(git diff --cached --stat | tail -1 | awk '{print $4}')
-DELETIONS=$(git diff --cached --stat | tail -1 | awk '{print $6}')
-
-# Analyze changes to extract meaningful context
-analyze_changes() {
-    local file="$1"
-    local diff_output="$2"
-
-    # Detect file type
-    if [[ "$file" == *.md || "$file" == *.txt || "$file" == README* ]]; then
-        echo "documentation"
-    elif [[ "$file" == *.py ]]; then
-        # Check for function/class definitions
-        if echo "$diff_output" | grep -q "^+.*def \|^+.*class "; then
-            echo "feature"
-        elif echo "$diff_output" | grep -q "^+.*import \|^-.*import "; then
-            echo "dependencies"
-        elif echo "$diff_output" | grep -q "^+.*#"; then
-            echo "refactor"
-        else
-            echo "bugfix"
-        fi
-    elif [[ "$file" == *.json || "$file" == *.yaml || "$file" == *.yml || "$file" == *.toml ]]; then
-        echo "configuration"
-    elif [[ "$file" == *.ipynb ]]; then
-        echo "notebook"
-    else
-        echo "general"
-    fi
-}
-
-# Extract meaningful change summary
-CHANGE_TYPES=""
-CHANGE_DETAILS=""
-for file in $CHANGES; do
-    FILE_DIFF=$(git diff --cached "$file" 2>/dev/null || true)
-    CHANGE_TYPE=$(analyze_changes "$file" "$FILE_DIFF")
-
-    # Add to types list
-    if ! echo "$CHANGE_TYPES" | grep -q "$CHANGE_TYPE"; then
-        CHANGE_TYPES="$CHANGE_TYPES $CHANGE_TYPE"
-    fi
-
-    # Extract meaningful details
-    case "$CHANGE_TYPE" in
-        feature)
-            FUNCS=$(echo "$FILE_DIFF" | grep "^+.*def " | head -1 | sed 's/.*def //; s/(.*//')
-            if [ ! -z "$FUNCS" ]; then
-                CHANGE_DETAILS="$CHANGE_DETAILS • Added function: $FUNCS"$'\n'
-            fi
-            ;;
-        bugfix)
-            # Look for common bugfix indicators
-            if echo "$FILE_DIFF" | grep -qE "^[+-].*fix|bug|error|issue"; then
-                CHANGE_DETAILS="$CHANGE_DETAILS • Fixed bug in $file"$'\n'
-            fi
-            ;;
-        configuration)
-            # Extract changed settings
-            SETTINGS=$(echo "$FILE_DIFF" | grep "^[+-]" | grep -o '"[^"]*":' | head -3 | tr -d '":')
-            if [ ! -z "$SETTINGS" ]; then
-                CHANGE_DETAILS="$CHANGE_DETAILS • Updated settings in $file: $SETTINGS"$'\n'
-            fi
-            ;;
-        documentation)
-            CHANGE_DETAILS="$CHANGE_DETAILS • Updated documentation in $file"$'\n'
-            ;;
-        notebook)
-            # Check if cells or outputs changed
-            if echo "$FILE_DIFF" | grep -q "cells"; then
-                CHANGE_DETAILS="$CHANGE_DETAILS • Modified notebook cells in $file"$'\n'
-            fi
-            ;;
-    esac
-done
-
-# Create a more meaningful commit message
-CHANGE_TYPES=$(echo "$CHANGE_TYPES" | xargs | sed 's/ /, /g')
-COMMIT_MSG="$BRANCH_DATE: Update $FILES_SUMMARY"
-
-# Add type context if available
-if [ ! -z "$CHANGE_TYPES" ] && [ "$CHANGE_TYPES" != "general" ]; then
-    COMMIT_MSG="$COMMIT_MSG ($CHANGE_TYPES)"
-fi
-
-if [ ! -z "$INSERTIONS" ] && [ ! -z "$DELETIONS" ]; then
-    COMMIT_MSG="$COMMIT_MSG [+$INSERTIONS -$DELETIONS]"
-fi
-
-# Create detailed description for PR with meaningful details
-PR_DESCRIPTION="## Changes on $BRANCH_DATE
-
-**Summary**: Updated $CHANGES_COUNT file(s)
-
-**Files Modified**:
-$(echo "$CHANGES" | sed 's/^/- /')
-
-**Change Details**:
-$([ ! -z "$CHANGE_DETAILS" ] && echo "$CHANGE_DETAILS" || echo "- Various updates")
-
-**Statistics**: +$INSERTIONS -$DELETIONS
-
----
-*Automatically generated PR from dated branch $BRANCH_DATE*"
+CHANGES_COUNT=$(git diff --cached --name-only | grep -c . || echo "0")
+STATS=$(git diff --cached --shortstat | sed 's/^ *//')
 
 echo "📝 Commit message: $COMMIT_MSG"
-echo "📋 Changes: $CHANGES_COUNT file(s) | +$INSERTIONS -$DELETIONS"
+echo "📋 Changes: $CHANGES_COUNT file(s) | $STATS"
 
-# Commit with meaningful message
-git commit -m "$COMMIT_MSG" || echo "⚠️ Commit failed"
+git commit -m "$COMMIT_MSG"
 
 # Push to both remotes
 git pushboth "$BRANCH_DATE"
@@ -165,8 +98,8 @@ if command -v gh >/dev/null 2>&1; then
 
         if ! echo "$PR_JSON" | grep -q "number"; then
             # PR does not exist - Create new PR
-            PR_URL=$(gh pr create --head "$BRANCH_DATE" --base main --title "$COMMIT_MSG" --body "$PR_DESCRIPTION" --repo "$GH_REPO" 2>/dev/null | grep -o "https://[^[:space:]]*" || echo "")
-            if [ ! -z "$PR_URL" ]; then
+            PR_URL=$(gh pr create --head "$BRANCH_DATE" --base main --title "$PR_TITLE" --body "$PR_BODY" --repo "$GH_REPO" 2>/dev/null | grep -o "https://[^[:space:]]*" || echo "")
+            if [ -n "$PR_URL" ]; then
                 echo "      ✅ PR created: $PR_URL"
             else
                 echo "      ⚠️ Could not create PR"
@@ -174,9 +107,9 @@ if command -v gh >/dev/null 2>&1; then
         else
             # PR exists - update it
             PR_NUMBER=$(echo "$PR_JSON" | grep -o '"number":[0-9]*' | grep -o '[0-9]*' | head -1)
-            if [ ! -z "$PR_NUMBER" ]; then
+            if [ -n "$PR_NUMBER" ]; then
                 # Update PR title and body
-                gh pr edit "$PR_NUMBER" --title "$COMMIT_MSG" --body "$PR_DESCRIPTION" --repo "$GH_REPO" 2>/dev/null && \
+                gh pr edit "$PR_NUMBER" --title "$PR_TITLE" --body "$PR_BODY" --repo "$GH_REPO" 2>/dev/null && \
                     echo "      ✅ PR #$PR_NUMBER updated with new description" || \
                     echo "      ⚠️ Could not update PR"
             fi
@@ -191,12 +124,12 @@ if command -v glab >/dev/null 2>&1; then
     echo "   🔹 GitLab:"
 
     # Check if MR exists
-    MR_JSON=$(glab mr list --source-branch "$BRANCH_DATE" --json iid,title 2>/dev/null || echo "")
+    MR_JSON=$(glab mr list --source-branch "$BRANCH_DATE" -F json 2>/dev/null || echo "")
 
     if ! echo "$MR_JSON" | grep -q "iid"; then
         # MR does not exist - Create new MR
-        MR_URL=$(glab mr create --source-branch "$BRANCH_DATE" --target-branch main --title "$COMMIT_MSG" --description "$PR_DESCRIPTION" 2>/dev/null | grep -o "https://[^[:space:]]*" || echo "")
-        if [ ! -z "$MR_URL" ]; then
+        MR_URL=$(glab mr create --source-branch "$BRANCH_DATE" --target-branch main --title "$PR_TITLE" --description "$PR_BODY" 2>/dev/null | grep -o "https://[^[:space:]]*" || echo "")
+        if [ -n "$MR_URL" ]; then
             echo "      ✅ MR created: $MR_URL"
         else
             echo "      ⚠️ Could not create MR"
@@ -204,9 +137,9 @@ if command -v glab >/dev/null 2>&1; then
     else
         # MR exists - update it
         MR_IID=$(echo "$MR_JSON" | grep -o '"iid":[0-9]*' | grep -o '[0-9]*' | head -1)
-        if [ ! -z "$MR_IID" ]; then
+        if [ -n "$MR_IID" ]; then
             # Update MR title and description
-            glab mr update "$MR_IID" --title "$COMMIT_MSG" --description "$PR_DESCRIPTION" 2>/dev/null && \
+            glab mr update "$MR_IID" --title "$PR_TITLE" --description "$PR_BODY" 2>/dev/null && \
                 echo "      ✅ MR !$MR_IID updated with new description" || \
                 echo "      ⚠️ Could not update MR"
         fi
@@ -217,4 +150,3 @@ fi
 
 echo ""
 echo "✨ Done! Branch: $BRANCH_DATE"
-
