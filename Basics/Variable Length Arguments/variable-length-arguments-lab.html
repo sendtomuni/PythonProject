@@ -1,0 +1,279 @@
+<title>Variable Length Arguments Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: scenario rail on top, then code (left) beside memory (right), explanation + console under memory; controls stick to the code panel. */
+:root{
+  --bg:#f3f5f9; --surface:#ffffff; --sunk:#e9edf4; --line:#d5dbe6;
+  --fg:#1b2333; --muted:#5d6779; --accent:#2747c9; --accent-fg:#ffffff;
+  --code-bg:#151b28; --code-fg:#dfe5f0; --code-muted:#6f7a8f;
+  --pending:#f2b632; --pending-soft:#fff3d4; --done:#1f9d6b; --done-soft:#dcf5ea;
+  --err:#c73b2c; --err-soft:#fde5e1;
+  --o1:#2747c9; --o2:#0e8a83; --o3:#7a3fc4; --o4:#c2410c; --o5:#b0256f;
+  --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f131b; --surface:#171d29; --sunk:#1e2533; --line:#2c3547;
+  --fg:#e6eaf2; --muted:#9aa4b7; --accent:#7f9bff; --accent-fg:#0f131b;
+  --code-bg:#0b0f16; --code-fg:#dfe5f0; --code-muted:#5f6a7e;
+  --pending:#f2b632; --pending-soft:#3a3018; --done:#3cc48e; --done-soft:#143327;
+  --err:#ff7b6b; --err-soft:#3b1c18;
+  --o1:#7f9bff; --o2:#3cc4bb; --o3:#b48bff; --o4:#ff9a5c; --o5:#ff7ab8; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f131b; --surface:#171d29; --sunk:#1e2533; --line:#2c3547;
+  --fg:#e6eaf2; --muted:#9aa4b7; --accent:#7f9bff; --accent-fg:#0f131b;
+  --code-bg:#0b0f16; --code-fg:#dfe5f0; --code-muted:#5f6a7e;
+  --pending:#f2b632; --pending-soft:#3a3018; --done:#3cc48e; --done-soft:#143327;
+  --err:#ff7b6b; --err-soft:#3b1c18;
+  --o1:#7f9bff; --o2:#3cc4bb; --o3:#b48bff; --o4:#ff9a5c; --o5:#ff7ab8; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--body);margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:22px 40px;display:grid;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
+h1{font:700 clamp(26px,3.2vw,34px)/1.1 var(--display);margin:0;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted);max-width:62ch}
+.rail{display:flex;flex-wrap:wrap;gap:8px}
+.rail button{font:500 14px var(--body);color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer;display:inline-flex;gap:8px;align-items:baseline}
+.rail button small{font:12px var(--mono);color:var(--muted)}
+.rail button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.rail button[aria-selected="true"] small{color:inherit;opacity:.8}
+.rail button:focus-visible,.ctl button:focus-visible,select:focus-visible{outline:3px solid var(--pending);outline-offset:2px}
+.blurb{margin:0;color:var(--muted)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:18px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;min-width:0}
+.panel h2{font:600 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0;padding:12px 16px 0}
+/* code */
+.code{background:var(--code-bg);border-radius:12px;overflow:hidden}
+.code ol{list-style:none;margin:0;padding:14px 0;font:14px/1.9 var(--mono);color:var(--code-fg);overflow-x:auto}
+.code li{display:grid;grid-template-columns:48px 22px auto;align-items:center;white-space:pre;padding-right:16px;border-left:4px solid transparent}
+.code li .n{color:var(--code-muted);text-align:right;padding-right:10px}
+.code li .mk{font-size:12px;color:var(--code-muted)}
+.code li.ready{background:rgba(242,182,50,.16);border-left-color:var(--pending)}
+.code li.ready .mk{color:var(--pending)}
+.code li.ran{background:rgba(60,196,142,.16);border-left-color:var(--done)}
+.code li.ran .mk{color:var(--done)}
+.code li.bad{background:rgba(255,123,107,.18);border-left-color:var(--err)}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 14px;border-top:1px solid #ffffff14;background:#ffffff08}
+.ctl button{font:600 14px var(--body);border-radius:8px;border:1px solid #ffffff2a;background:#ffffff10;color:var(--code-fg);padding:8px 13px;cursor:pointer}
+.ctl button:disabled{opacity:.4;cursor:default}
+.ctl .go{background:var(--pending);border-color:var(--pending);color:#1b1503;min-width:150px}
+.ctl .go.next{background:var(--done);border-color:var(--done);color:#04150e}
+.ctl .spacer{flex:1}
+.ctl label{color:var(--code-muted);font:12px var(--mono);display:flex;gap:6px;align-items:center}
+.ctl select{font:12px var(--mono);background:#ffffff10;color:var(--code-fg);border:1px solid #ffffff2a;border-radius:6px;padding:4px}
+.prog{font:12px var(--mono);color:var(--code-muted);padding:0 16px 12px}
+.bar{height:4px;background:#ffffff14;margin:0 16px 10px;border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pending);width:0;transition:width .3s}
+/* memory */
+.mem{padding:6px 16px 16px;display:grid;gap:14px}
+.names{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;font:14px var(--mono)}
+.names .k{color:var(--muted);text-align:right}
+.chip{display:inline-flex;align-items:center;gap:6px;font:600 13px var(--mono);padding:2px 9px;border-radius:999px;border:1.5px solid currentColor}
+.val{font:14px var(--mono)}
+.obj{display:grid;gap:4px}
+.obj .hd{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font:12px var(--mono);color:var(--muted)}
+.obj .hd .tag{font-weight:600}
+.badge{font:600 11px var(--body);letter-spacing:.04em;text-transform:uppercase;padding:1px 7px;border-radius:4px;background:var(--done-soft);color:var(--done)}
+.cells{display:flex;flex-wrap:wrap;gap:0;overflow-x:auto;padding-bottom:2px}
+.cell{display:grid;grid-template-rows:auto 40px auto;text-align:center;min-width:52px}
+.cell .ix{font:11px var(--mono);color:var(--muted);line-height:1.6}
+.cell .bx{display:grid;place-items:center;border:1.5px solid var(--line);margin-left:-1.5px;background:var(--sunk);font:600 15px var(--mono);padding:0 6px}
+.cell:first-child .bx{border-radius:7px 0 0 7px;margin-left:0}
+.cell:last-child .bx{border-radius:0 7px 7px 0}
+.cell .bx.chg{background:var(--pending-soft);border-color:var(--pending);position:relative;z-index:1}
+.cell .bx.new{background:var(--done-soft);border-color:var(--done);position:relative;z-index:1}
+.cell .bx .ref{font-size:12px}
+.empty{font:13px var(--mono);color:var(--muted);padding:10px 0}
+.was{font:12px var(--mono);color:var(--muted)}
+.was s{text-decoration-color:var(--err)}
+.explain{padding:14px 16px;display:grid;gap:8px}
+.explain .state{font:600 12px var(--body);letter-spacing:.06em;text-transform:uppercase}
+.explain .state.ready{color:#a87300}
+:root:not([data-theme="light"]) .explain .state.ready{color:var(--pending)}
+.explain .state.ran{color:var(--done)}
+.explain p{margin:0;max-width:65ch}
+.err{background:var(--err-soft);color:var(--err);border-radius:8px;padding:8px 12px;font:600 13px var(--mono)}
+.console{background:var(--code-bg);color:var(--code-fg);border-radius:10px;font:13px/1.6 var(--mono);padding:10px 14px;min-height:46px;white-space:pre-wrap;overflow-x:auto;margin:0 16px 16px}
+.console .ph{color:var(--code-muted)}
+.console .fresh{color:var(--done)}
+.foot{color:var(--muted);font-size:13px}
+kbd{font:12px var(--mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--surface)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@keyframes pop{from{transform:scale(.86)}to{transform:scale(1)}}
+.cell .bx.chg,.cell .bx.new{animation:pop .25s ease-out}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Variable Length Arguments Lab</h1>
+    <p>Run each line yourself. The yellow line is about to run; press <b>Run line</b> to execute it and see what changed, then <b>Next line</b>.</p>
+  </header>
+  <nav class="rail" id="rail" role="tablist" aria-label="Examples"></nav>
+  <p class="blurb" id="blurb"></p>
+  <div class="grid">
+    <section class="code" aria-label="Code">
+      <ol id="code"></ol>
+      <div class="bar"><i id="bar"></i></div>
+      <div class="prog" id="prog"></div>
+      <div class="ctl">
+        <button id="back" title="Back (←)">◀ Back</button>
+        <button id="go" class="go">▶ Run line</button>
+        <button id="reset" title="Start over">↺ Reset</button>
+        <span class="spacer"></span>
+        <button id="auto" aria-pressed="false">⏵ Auto</button>
+        <label for="speed">speed <select id="speed"><option value="2600">slow</option><option value="1600" selected>normal</option><option value="900">fast</option></select></label>
+      </div>
+    </section>
+    <div style="display:grid;gap:18px;min-width:0">
+      <section class="panel" aria-label="Memory">
+        <h2>Variables &amp; objects in memory</h2>
+        <div class="mem" id="mem"></div>
+      </section>
+      <section class="panel" aria-live="polite">
+        <div class="explain" id="explain"></div>
+        <h2 style="padding-top:0">Output</h2>
+        <div style="height:8px"></div>
+        <pre class="console" id="console"></pre>
+      </section>
+    </div>
+  </div>
+  <p class="foot">Keys: <kbd>Space</kbd> or <kbd>→</kbd> run / next · <kbd>←</kbd> back · <kbd>R</kbd> reset. Every state shown here was recorded by running the code in Python __PYVER__. Part of the <em>Variable Length Arguments (*args, **kwargs) and Multiple Returns</em> Confluence page.</p>
+</div>
+
+<script>
+const DATA = [{"id": "pack", "title": "Packing extra positionals into *args", "section": "Lecture 155", "blurb": "Fixed parameters bind first; everything left over is packed into a tuple.", "code": ["def show(a, b, *args):", "    print(a, b, args)", "show(1, 2, 3, 4, 5)", "show(1, 2)"], "steps": [{"line": 0, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {}, "heap": {}, "kinds": {}}, "out": "", "note": ""}, {"line": 2, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {"a": {"v": "1"}, "b": {"v": "2"}, "args": {"ref": "#1"}}, "heap": {"#1": [{"v": "3"}, {"v": "4"}, {"v": "5"}]}, "kinds": {"#1": "tuple"}}, "out": "", "note": "The call starts: 1 -> a, 2 -> b, and 3, 4, 5 are packed into the tuple args."}, {"line": 1, "before": {"names": {"a": {"v": "1"}, "b": {"v": "2"}, "args": {"ref": "#1"}}, "heap": {"#1": [{"v": "3"}, {"v": "4"}, {"v": "5"}]}, "kinds": {"#1": "tuple"}}, "after": {"names": {}, "heap": {}, "kinds": {}}, "out": "1 2 (3, 4, 5)\n", "note": "Inside the function: args is a tuple holding every extra positional argument (empty when there are none)."}, {"line": 3, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {"a": {"v": "1"}, "b": {"v": "2"}, "args": {"ref": "#2"}}, "heap": {"#2": []}, "kinds": {"#2": "tuple"}}, "out": "", "note": "Second call with no extras: args is an empty tuple, not an error."}, {"line": 1, "before": {"names": {"a": {"v": "1"}, "b": {"v": "2"}, "args": {"ref": "#2"}}, "heap": {"#2": []}, "kinds": {"#2": "tuple"}}, "after": {"names": {}, "heap": {}, "kinds": {}}, "out": "1 2 ()\n", "note": "Inside the function: args is a tuple holding every extra positional argument (empty when there are none)."}]}, {"id": "unpack", "title": "Passing a list vs unpacking it with *", "section": "Lecture 155", "blurb": "A list passed directly is ONE argument; *L1 spreads it into separate arguments.", "code": ["def count(*args):", "    print(args, len(args))", "L1 = [10, 20, 30]", "count(L1)", "count(*L1)"], "steps": [{"line": 0, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {}, "heap": {}, "kinds": {}}, "out": "", "note": ""}, {"line": 2, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {"L1": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "list"}}, "out": "", "note": "A list of three numbers."}, {"line": 3, "before": {"names": {"L1": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "list"}}, "after": {"names": {"args": {"ref": "#2"}}, "heap": {"#2": [{"ref": "#1"}], "#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#2": "tuple", "#1": "list"}}, "out": "", "note": "The call passes the list as one single argument."}, {"line": 1, "before": {"names": {"args": {"ref": "#2"}}, "heap": {"#2": [{"ref": "#1"}], "#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#2": "tuple", "#1": "list"}}, "after": {"names": {"L1": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "list"}}, "out": "([10, 20, 30],) 1\n", "note": "print shows args and its length \u2013 compare the two calls: ONE element (the whole list) vs THREE elements (unpacked)."}, {"line": 4, "before": {"names": {"L1": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "list"}}, "after": {"names": {"args": {"ref": "#3"}}, "heap": {"#3": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#3": "tuple"}}, "out": "", "note": "The * operator unpacks the list into three separate positional arguments."}, {"line": 1, "before": {"names": {"args": {"ref": "#3"}}, "heap": {"#3": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#3": "tuple"}}, "after": {"names": {"L1": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "list"}}, "out": "(10, 20, 30) 3\n", "note": "print shows args and its length \u2013 compare the two calls: ONE element (the whole list) vs THREE elements (unpacked)."}]}, {"id": "kwargs", "title": "Collecting keyword arguments with **kwargs", "section": "Lecture 156", "blurb": "Extra keyword arguments are packed into a dictionary.", "code": ["def info(a, b, **kwargs):", "    print(a, b, kwargs)", "info(1, 2, name='Alice', age=30)", "info(a=1, b=2)"], "steps": [{"line": 0, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {}, "heap": {}, "kinds": {}}, "out": "", "note": ""}, {"line": 2, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {"a": {"v": "1"}, "b": {"v": "2"}, "kwargs": {"v": "{'name': 'Alice', 'age': 30}"}}, "heap": {}, "kinds": {}}, "out": "", "note": "a and b bind to 1 and 2; name and age have no matching parameter, so they go into kwargs."}, {"line": 1, "before": {"names": {"a": {"v": "1"}, "b": {"v": "2"}, "kwargs": {"v": "{'name': 'Alice', 'age': 30}"}}, "heap": {}, "kinds": {}}, "after": {"names": {}, "heap": {}, "kinds": {}}, "out": "1 2 {'name': 'Alice', 'age': 30}\n", "note": "kwargs is a dict: keys are the argument names, values are what was passed (empty if nothing extra)."}, {"line": 3, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {"a": {"v": "1"}, "b": {"v": "2"}, "kwargs": {"v": "{}"}}, "heap": {}, "kinds": {}}, "out": "", "note": "a and b may be passed by keyword; nothing is left over so kwargs is an empty dict."}, {"line": 1, "before": {"names": {"a": {"v": "1"}, "b": {"v": "2"}, "kwargs": {"v": "{}"}}, "heap": {}, "kinds": {}}, "after": {"names": {}, "heap": {}, "kinds": {}}, "out": "1 2 {}\n", "note": "kwargs is a dict: keys are the argument names, values are what was passed (empty if nothing extra)."}]}, {"id": "full", "title": "All parameter kinds together", "section": "Lectures 155-156", "blurb": "Order: positional, *args, keyword-only, **kwargs.", "code": ["def f(a, b, *args, c=100, d=200, **kwargs):", "    print(a, b, args, c, d, kwargs)", "f(1, 2, 3, 4, c=10, name='Alice')", "f(1, 2)"], "steps": [{"line": 0, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {}, "heap": {}, "kinds": {}}, "out": "", "note": ""}, {"line": 2, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {"a": {"v": "1"}, "b": {"v": "2"}, "c": {"v": "10"}, "d": {"v": "200"}, "args": {"ref": "#1"}, "kwargs": {"v": "{'name': 'Alice'}"}}, "heap": {"#1": [{"v": "3"}, {"v": "4"}]}, "kinds": {"#1": "tuple"}}, "out": "", "note": "1, 2 -> a, b. 3, 4 -> args. c=10 overrides the default. name='Alice' -> kwargs. d keeps 200."}, {"line": 1, "before": {"names": {"a": {"v": "1"}, "b": {"v": "2"}, "c": {"v": "10"}, "d": {"v": "200"}, "args": {"ref": "#1"}, "kwargs": {"v": "{'name': 'Alice'}"}}, "heap": {"#1": [{"v": "3"}, {"v": "4"}]}, "kinds": {"#1": "tuple"}}, "after": {"names": {}, "heap": {}, "kinds": {}}, "out": "1 2 (3, 4) 10 200 {'name': 'Alice'}\n", "note": "Each parameter received exactly the kind of value its position allows."}, {"line": 3, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {"a": {"v": "1"}, "b": {"v": "2"}, "c": {"v": "100"}, "d": {"v": "200"}, "args": {"ref": "#2"}, "kwargs": {"v": "{}"}}, "heap": {"#2": []}, "kinds": {"#2": "tuple"}}, "out": "", "note": "Only the required a and b given: args=(), c=100, d=200, kwargs={}."}, {"line": 1, "before": {"names": {"a": {"v": "1"}, "b": {"v": "2"}, "c": {"v": "100"}, "d": {"v": "200"}, "args": {"ref": "#2"}, "kwargs": {"v": "{}"}}, "heap": {"#2": []}, "kinds": {"#2": "tuple"}}, "after": {"names": {}, "heap": {}, "kinds": {}}, "out": "1 2 () 100 200 {}\n", "note": "Each parameter received exactly the kind of value its position allows."}]}, {"id": "kwonly", "title": "Keyword-only parameters after *args", "section": "Lecture 155", "blurb": "Parameters after *args can only be given by keyword.", "code": ["def f(*args, a, b):", "    print(a, b, args)", "f(10, 20, 30, a=40, b=50)", "f(10, 20, 30, 40, 50)"], "steps": [{"line": 0, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {}, "heap": {}, "kinds": {}}, "out": "", "note": ""}, {"line": 2, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {"a": {"v": "40"}, "b": {"v": "50"}, "args": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "tuple"}}, "out": "", "note": "10, 20, 30 are swallowed by args; a and b are matched by keyword."}, {"line": 1, "before": {"names": {"a": {"v": "40"}, "b": {"v": "50"}, "args": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "tuple"}}, "after": {"names": {}, "heap": {}, "kinds": {}}, "out": "40 50 (10, 20, 30)\n", "note": "a=40, b=50, args=(10, 20, 30)."}, {"line": 3, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {}, "heap": {}, "kinds": {}}, "out": "", "note": "Every value is swallowed by *args, so a and b are never given - Python refuses.", "error": "TypeError: f() missing 2 required keyword-only arguments: 'a' and 'b'"}]}, {"id": "multi", "title": "Multiple return values", "section": "Lecture 157", "blurb": "return a, b packs a tuple; the caller can unpack it.", "code": ["def sum_product(a, b):", "    return a + b, a * b", "r = sum_product(3, 4)", "s, p = sum_product(3, 4)"], "steps": [{"line": 0, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {}, "heap": {}, "kinds": {}}, "out": "", "note": ""}, {"line": 2, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {"a": {"v": "3"}, "b": {"v": "4"}}, "heap": {}, "kinds": {}}, "out": "", "note": "The call binds 3 -> a and 4 -> b; the function body runs next."}, {"line": 1, "before": {"names": {"a": {"v": "3"}, "b": {"v": "4"}}, "heap": {}, "kinds": {}}, "after": {"names": {"r": {"ref": "#1"}}, "heap": {"#1": [{"v": "7"}, {"v": "12"}]}, "kinds": {"#1": "tuple"}}, "out": "", "note": "The comma in return builds the tuple (7, 12) and hands it back to the caller."}, {"line": 3, "before": {"names": {"r": {"ref": "#1"}}, "heap": {"#1": [{"v": "7"}, {"v": "12"}]}, "kinds": {"#1": "tuple"}}, "after": {"names": {"a": {"v": "3"}, "b": {"v": "4"}}, "heap": {}, "kinds": {}}, "out": "", "note": "Same call again; this time the caller will unpack the returned tuple into s and p."}, {"line": 1, "before": {"names": {"a": {"v": "3"}, "b": {"v": "4"}}, "heap": {}, "kinds": {}}, "after": {"names": {"r": {"ref": "#1"}, "s": {"v": "7"}, "p": {"v": "12"}}, "heap": {"#1": [{"v": "7"}, {"v": "12"}]}, "kinds": {"#1": "tuple"}}, "out": "", "note": "The comma in return builds the tuple (7, 12) and hands it back to the caller."}]}];
+const OBJ_COLORS = ['--o1','--o2','--o3','--o4','--o5'];
+const $ = id => document.getElementById(id);
+let sc = DATA[0], p = 0, phase = 'ready', timer = null;
+
+function colorOf(label){ const n = parseInt(label.slice(1),10)-1; return `var(${OBJ_COLORS[n % OBJ_COLORS.length]})`; }
+function esc(s){ return String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+let KINDS = {};
+function kindOf(lab){ return KINDS[lab] || 'list'; }
+function show(v){ return v.ref ? `<span class="chip ref" style="color:${colorOf(v.ref)}">→ ${kindOf(v.ref)} ${v.ref}</span>` : `<span class="val">${esc(v.v)}</span>`; }
+function same(a,b){ return a && b && a.ref===b.ref && a.v===b.v; }
+function pyList(heap, lab, depth=0){
+  const tup = kindOf(lab)==='tuple';
+  if(depth>3) return tup ? '(...)' : '[...]';
+  const parts = heap[lab].map(x => x.ref ? pyList(heap, x.ref, depth+1) : x.v);
+  return tup ? '(' + parts.join(', ') + (parts.length===1 ? ',' : '') + ')' : '[' + parts.join(', ') + ']';
+}
+
+function buildRail(){
+  $('rail').innerHTML = DATA.map(d => `<button role="tab" id="tab-${d.id}" aria-selected="${d===sc}" data-id="${d.id}">${esc(d.title)} <small>${esc(d.section)}</small></button>`).join('');
+  $('rail').querySelectorAll('button').forEach(b => b.onclick = () => select(b.dataset.id, true));
+}
+
+function select(id, push){
+  const d = DATA.find(x => x.id===id) || DATA[0];
+  stopAuto(); sc = d; p = 0; phase = 'ready';
+  if(push){ try{ history.replaceState(null,'','#'+d.id); }catch(e){} }
+  buildRail(); render();
+}
+
+function render(){
+  const st = sc.steps[p];
+  const state = phase==='ready' ? st.before : st.after;
+  const prev = st.before;
+  KINDS = Object.assign({}, prev.kinds||{}, state.kinds||{});
+  $('blurb').textContent = sc.blurb;
+  // code
+  $('code').innerHTML = sc.code.map((ln,i) => {
+    let cls = '', mk = '';
+    if(i===st.line){ cls = phase==='ready' ? 'ready' : (st.error ? 'bad' : 'ran'); mk = phase==='ready' ? '▶' : (st.error ? '✕' : '✓'); }
+    return `<li class="${cls}"><span class="n">${i+1}</span><span class="mk">${mk}</span><span>${esc(ln)||' '}</span></li>`;
+  }).join('');
+  // progress
+  const total = sc.steps.length;
+  const doneCount = p + (phase==='ran' ? 1 : 0);
+  $('bar').style.width = (100*doneCount/total)+'%';
+  $('prog').textContent = `step ${p+1} of ${total} · line ${st.line+1} ${phase==='ready' ? 'is next' : 'executed'}`;
+  const last = p===total-1 && phase==='ran';
+  $('go').textContent = phase==='ready' ? '▶ Run line' : (last ? '✓ Finished' : '⏭ Next line');
+  $('go').className = 'go' + (phase==='ran' ? ' next' : '');
+  $('go').disabled = last;
+  $('back').disabled = p===0 && phase==='ready';
+  // memory
+  const names = Object.entries(state.names);
+  let html = '';
+  if(!names.length){ html = '<div class="empty">Nothing in memory yet – run the first line.</div>'; }
+  else{
+    html += '<div class="names">' + names.map(([k,v]) => {
+      const changed = phase==='ran' && !same(v, prev.names[k]);
+      return `<span class="k">${esc(k)}</span><span>${show(v)}${changed ? ' <span class="badge">' + (prev.names[k] ? 'updated' : 'new') + '</span>' : ''}</span>`;
+    }).join('') + '</div>';
+    for(const [lab, items] of Object.entries(state.heap)){
+      const before = prev.heap[lab];
+      const isNew = phase==='ran' && !before;
+      const holders = names.filter(([k,v]) => v.ref===lab).map(([k]) => k);
+      const n = items.length;
+      const cells = items.map((x,i) => {
+        let c = '';
+        if(phase==='ran' && before){ if(i>=before.length) c='new'; else if(!same(x,before[i])) c='chg'; }
+        if(isNew) c = 'new';
+        const inner = x.ref ? `<span class="ref" style="color:${colorOf(x.ref)}">→ ${x.ref}</span>` : esc(x.v);
+        return `<div class="cell"><span class="ix">${i}</span><span class="bx ${c}">${inner}</span><span class="ix">${i-n}</span></div>`;
+      }).join('');
+      const changed = phase==='ran' && before && pyList(state.heap,lab)!==pyList(prev.heap,lab);
+      html += `<div class="obj"><div class="hd"><span class="tag" style="color:${colorOf(lab)}">${kindOf(lab)} ${lab}</span>`+
+        `<span>${holders.length ? 'named ' + holders.join(', ') : 'inside another object'}</span>`+
+        `<span>len ${n}</span>${isNew ? '<span class="badge">new ' + kindOf(lab) + '</span>' : ''}</div>`+
+        (n ? `<div class="cells">${cells}</div>` : (kindOf(lab)==='tuple' ? '<div class="empty">( ) empty tuple</div>' : '<div class="empty">[ ] empty list</div>')) +
+        (changed ? `<div class="was">was <s>${esc(pyList(prev.heap,lab))}</s></div>` : '') + '</div>';
+    }
+  }
+  $('mem').innerHTML = html;
+  // explanation
+  let ex = '';
+  if(phase==='ready'){
+    ex = `<span class="state ready">Next: line ${st.line+1}</span><p><code>${esc(sc.code[st.line].trim())}</code> – what do you expect to happen? Press <b>Run line</b> to check.</p>`;
+  } else {
+    ex = `<span class="state ran">${st.error ? 'Raised an error' : 'Ran line ' + (st.line+1)}</span><p>${esc(st.note)}</p>`;
+    if(st.error) ex += `<div class="err">${esc(st.error)}</div>`;
+  }
+  $('explain').innerHTML = ex;
+  // console
+  let out = '';
+  for(let i=0;i<p;i++) out += esc(sc.steps[i].out);
+  let fresh = phase==='ran' ? sc.steps[p].out : '';
+  if(phase==='ran' && st.error) fresh += 'Traceback (most recent call last): ...\n' + st.error + '\n';
+  $('console').innerHTML = (out || fresh) ? out + (fresh ? `<span class="fresh">${esc(fresh)}</span>` : '') : '<span class="ph">print() output appears here</span>';
+}
+
+function forward(){
+  if(phase==='ready'){ phase='ran'; }
+  else if(p < sc.steps.length-1){ p++; phase='ready'; }
+  else { stopAuto(); }
+  render();
+}
+function backward(){
+  if(phase==='ran'){ phase='ready'; }
+  else if(p>0){ p--; phase='ran'; }
+  render();
+}
+function reset(){ stopAuto(); p=0; phase='ready'; render(); }
+function stopAuto(){ if(timer){ clearInterval(timer); timer=null; } $('auto').textContent='⏵ Auto'; $('auto').setAttribute('aria-pressed','false'); }
+function toggleAuto(){
+  if(timer){ stopAuto(); return; }
+  if(p===sc.steps.length-1 && phase==='ran') reset();
+  $('auto').textContent='⏸ Pause'; $('auto').setAttribute('aria-pressed','true');
+  forward();
+  timer = setInterval(() => { if(p===sc.steps.length-1 && phase==='ran') stopAuto(); else forward(); }, +$('speed').value);
+}
+$('go').onclick = () => { stopAuto(); forward(); };
+$('back').onclick = () => { stopAuto(); backward(); };
+$('reset').onclick = reset;
+$('auto').onclick = toggleAuto;
+$('speed').onchange = () => { if(timer){ stopAuto(); toggleAuto(); } };
+document.addEventListener('keydown', e => {
+  if(e.target.closest && e.target.closest('select')) return;
+  if(e.key===' ' || e.key==='ArrowRight'){ e.preventDefault(); stopAuto(); forward(); }
+  else if(e.key==='ArrowLeft'){ e.preventDefault(); stopAuto(); backward(); }
+  else if(e.key==='r' || e.key==='R'){ reset(); }
+});
+const start = (location.hash||'').slice(1);
+select(DATA.some(d => d.id===start) ? start : DATA[0].id, false);
+</script>
