@@ -1,0 +1,106 @@
+[
+ {
+  "id": "pack",
+  "title": "Packing extra positionals into *args",
+  "section": "Lecture 155",
+  "blurb": "Fixed parameters bind first; everything left over is packed into a tuple.",
+  "code": [
+   "def show(a, b, *args):",
+   "    print(a, b, args)",
+   "show(1, 2, 3, 4, 5)",
+   "show(1, 2)"
+  ],
+  "notes": {
+   "3": "The call starts: 1 -> a, 2 -> b, and 3, 4, 5 are packed into the tuple args.",
+   "2": "Inside the function: args is a tuple holding every extra positional argument (empty when there are none).",
+   "4": "Second call with no extras: args is an empty tuple, not an error."
+  }
+ },
+ {
+  "id": "unpack",
+  "title": "Passing a list vs unpacking it with *",
+  "section": "Lecture 155",
+  "blurb": "A list passed directly is ONE argument; *L1 spreads it into separate arguments.",
+  "code": [
+   "def count(*args):",
+   "    print(args, len(args))",
+   "L1 = [10, 20, 30]",
+   "count(L1)",
+   "count(*L1)"
+  ],
+  "notes": {
+   "3": "A list of three numbers.",
+   "4": "The call passes the list as one single argument.",
+   "2": "print shows args and its length \u2013 compare the two calls: ONE element (the whole list) vs THREE elements (unpacked).",
+   "5": "The * operator unpacks the list into three separate positional arguments."
+  }
+ },
+ {
+  "id": "kwargs",
+  "title": "Collecting keyword arguments with **kwargs",
+  "section": "Lecture 156",
+  "blurb": "Extra keyword arguments are packed into a dictionary.",
+  "code": [
+   "def info(a, b, **kwargs):",
+   "    print(a, b, kwargs)",
+   "info(1, 2, name='Alice', age=30)",
+   "info(a=1, b=2)"
+  ],
+  "notes": {
+   "3": "a and b bind to 1 and 2; name and age have no matching parameter, so they go into kwargs.",
+   "2": "kwargs is a dict: keys are the argument names, values are what was passed (empty if nothing extra).",
+   "4": "a and b may be passed by keyword; nothing is left over so kwargs is an empty dict."
+  }
+ },
+ {
+  "id": "full",
+  "title": "All parameter kinds together",
+  "section": "Lectures 155-156",
+  "blurb": "Order: positional, *args, keyword-only, **kwargs.",
+  "code": [
+   "def f(a, b, *args, c=100, d=200, **kwargs):",
+   "    print(a, b, args, c, d, kwargs)",
+   "f(1, 2, 3, 4, c=10, name='Alice')",
+   "f(1, 2)"
+  ],
+  "notes": {
+   "3": "1, 2 -> a, b. 3, 4 -> args. c=10 overrides the default. name='Alice' -> kwargs. d keeps 200.",
+   "2": "Each parameter received exactly the kind of value its position allows.",
+   "4": "Only the required a and b given: args=(), c=100, d=200, kwargs={}."
+  }
+ },
+ {
+  "id": "kwonly",
+  "title": "Keyword-only parameters after *args",
+  "section": "Lecture 155",
+  "blurb": "Parameters after *args can only be given by keyword.",
+  "code": [
+   "def f(*args, a, b):",
+   "    print(a, b, args)",
+   "f(10, 20, 30, a=40, b=50)",
+   "f(10, 20, 30, 40, 50)"
+  ],
+  "notes": {
+   "3": "10, 20, 30 are swallowed by args; a and b are matched by keyword.",
+   "2": "a=40, b=50, args=(10, 20, 30).",
+   "4": "Every value is swallowed by *args, so a and b are never given - Python refuses."
+  }
+ },
+ {
+  "id": "multi",
+  "title": "Multiple return values",
+  "section": "Lecture 157",
+  "blurb": "return a, b packs a tuple; the caller can unpack it.",
+  "code": [
+   "def sum_product(a, b):",
+   "    return a + b, a * b",
+   "r = sum_product(3, 4)",
+   "s, p = sum_product(3, 4)"
+  ],
+  "notes": {
+   "3": "The call binds 3 -> a and 4 -> b; the function body runs next.",
+   "2": "The comma in return builds the tuple (7, 12) and hands it back to the caller.",
+   "4": "Same call again; this time the caller will unpack the returned tuple into s and p."
+  }
+ }
+]
