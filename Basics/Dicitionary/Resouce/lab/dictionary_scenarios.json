@@ -1,0 +1,443 @@
+[
+ {
+  "id": "crud",
+  "title": "Add, update, delete keys",
+  "section": "§2.2",
+  "blurb": "Assigning to an existing key updates it, assigning to a new key inserts it, del removes it, and [] on a missing key raises KeyError.",
+  "code": [
+   "D1 = {1: \"one\", 2: \"two\", 3: \"three\", 4: \"four\"}",
+   "D1[3] = \"tres\"",
+   "D1[5] = \"five\"",
+   "del D1[2]",
+   "print(D1)",
+   "D1[9]"
+  ],
+  "notes": {
+   "1": "A dictionary with four key → value pairs. Keys 1–4 are the labels, the strings are the values.",
+   "2": "Key 3 already exists, so assignment UPDATES its value. The dictionary does not grow.",
+   "3": "Key 5 is new, so assignment INSERTS a new pair at the end. The dictionary now has 5 entries.",
+   "4": "del removes key 2 together with its value. The remaining pairs keep their order.",
+   "5": "print shows the dictionary as it is now: 4 entries in insertion order.",
+   "6": "Key 9 was never inserted, so lookup with [] raises KeyError. Use .get(9) to avoid the error."
+  }
+ },
+ {
+  "id": "loop_keys",
+  "title": "Looping over a dictionary",
+  "section": "§2.3",
+  "blurb": "A plain for loop over a dictionary hands out the KEYS, one per pass; D1[key] fetches the value.",
+  "code": [
+   "D1 = {1: \"one\", 2: \"two\", 3: \"three\"}",
+   "for key in D1:",
+   "    print(f\"Key: {key}, Value: {D1[key]}\")"
+  ],
+  "notes": {
+   "1": "Three key → value pairs.",
+   "2": "The loop takes the next KEY from the dictionary and stores it in key. Values are not handed out.",
+   "3": "D1[key] looks the value up from the key, and print shows both."
+  }
+ },
+ {
+  "id": "loop_items",
+  "title": "Looping with items()",
+  "section": "§5.1",
+  "blurb": "items() yields (key, value) pairs; unpacking them in the for header gives both names without a second lookup.",
+  "code": [
+   "d1 = {1: 'One', 2: 'Two', 3: 'Three'}",
+   "for key, value in d1.items():",
+   "    print(key, value)"
+  ],
+  "notes": {
+   "1": "Three pairs.",
+   "2": "items() hands out one (key, value) tuple per pass; the loop unpacks it into key and value.",
+   "3": "Both parts are available directly."
+  }
+ },
+ {
+  "id": "get_setdefault",
+  "title": "get() vs setdefault()",
+  "section": "§5.3",
+  "blurb": "get() only reads. setdefault() reads AND inserts the key when it is missing. [] raises KeyError.",
+  "code": [
+   "d1 = {1: 'One', 2: 'Two', 3: 'Three', 4: 'Four'}",
+   "print(d1.get(5))",
+   "print(d1.get(5, 'Missing'))",
+   "print(d1.setdefault(3))",
+   "d1.setdefault(5)",
+   "d1.setdefault(6, 'Undefined')",
+   "print(d1[7])"
+  ],
+  "notes": {
+   "1": "d1 has keys 1 to 4.",
+   "2": "get(5) returns None because key 5 is missing, and d1 is NOT changed.",
+   "3": "get(5, 'Missing') returns the supplied default instead of None. d1 is still unchanged.",
+   "4": "Key 3 exists, so setdefault(3) just returns its value, 'Three'. Nothing is inserted.",
+   "5": "Key 5 is missing, so setdefault inserts it with the default None. d1 grows.",
+   "6": "Key 6 is missing: it is inserted with the value you supplied, 'Undefined'.",
+   "7": "Key 7 was never inserted, so [] raises KeyError (get and setdefault would not)."
+  }
+ },
+ {
+  "id": "update",
+  "title": "update() merges",
+  "section": "§6.2",
+  "blurb": "update() copies every pair of another dictionary in: new keys are added, existing keys are overwritten.",
+  "code": [
+   "d1 = {1: 'One', 2: 'Two', 3: 'Three', 4: 'Four'}",
+   "d2 = {4: 'FOUR', 5: 'Five'}",
+   "d1.update(d2)",
+   "print(d1)"
+  ],
+  "notes": {
+   "1": "The dictionary that will receive the new pairs.",
+   "2": "d2 shares key 4 with d1 and brings a new key 5.",
+   "3": "Key 4 already exists in d1, so its value is OVERWRITTEN; key 5 is new, so it is ADDED. d2 is untouched.",
+   "4": "d1 now holds 5 pairs."
+  }
+ },
+ {
+  "id": "fromkeys",
+  "title": "fromkeys() and the shared list trap",
+  "section": "§6.3",
+  "blurb": "dict.fromkeys(keys, value) gives every key the SAME value object - harmless for numbers and strings, a trap for lists.",
+  "code": [
+   "l1 = [1, 2, 3]",
+   "d_none = dict.fromkeys(l1)",
+   "d_def = dict.fromkeys(l1, 'unknown')",
+   "shared = dict.fromkeys(l1, [])",
+   "shared[1].append('x')",
+   "print(shared)"
+  ],
+  "notes": {
+   "1": "Three keys to build a dictionary from.",
+   "2": "No second argument, so every value is None.",
+   "3": "Every key gets the same default string. Strings are immutable, so sharing is harmless.",
+   "4": "ONE empty list is created and every key points to that same list.",
+   "5": "Appending through key 1 changes the single shared list, so keys 2 and 3 'see' it too.",
+   "6": "All three values show ['x']. Use {k: [] for k in l1} to get a separate list per key."
+  }
+ },
+ {
+  "id": "copy",
+  "title": "Alias vs copy() (shallow copy)",
+  "section": "§6.4",
+  "blurb": "d2 = d1 is a second NAME for the same dictionary. d1.copy() is a new dictionary, but nested mutable values are still shared.",
+  "code": [
+   "d1 = {1: 'One', 2: 'Two', 3: ['a', 'b']}",
+   "d2 = d1",
+   "d3 = d1.copy()",
+   "d3[1] = 'ONE'",
+   "d3[3].append('c')",
+   "d2[4] = 'Four'"
+  ],
+  "notes": {
+   "1": "Key 3 holds a list, which is a mutable object.",
+   "2": "No copy is made: d2 is simply another name for the same dictionary object.",
+   "3": "copy() builds a NEW dictionary with its own pairs, but the list under key 3 is the SAME list (shallow copy).",
+   "4": "Rebinding key 1 in d3 only touches d3. d1 and d2 keep 'One'.",
+   "5": "The list under key 3 is one shared object, so d1, d2 and d3 all see 'c'.",
+   "6": "d2 is an alias of d1, so the new key appears in d1 as well, but not in the independent copy d3."
+  }
+ },
+ {
+  "id": "delete",
+  "title": "pop, popitem, del, clear",
+  "section": "§6.5",
+  "blurb": "pop(key) removes by key, popitem() removes the last pair, del removes by key, clear() empties everything.",
+  "code": [
+   "d1 = {1: 'One', 2: 'Two', 3: 'Three', 4: 'Four'}",
+   "value = d1.pop(2)",
+   "missing = d1.pop(5, 'Missing')",
+   "item = d1.popitem()",
+   "del d1[1]",
+   "d1.clear()",
+   "d1.pop(5)"
+  ],
+  "notes": {
+   "1": "Four pairs.",
+   "2": "pop(2) removes key 2 and returns its value, 'Two'.",
+   "3": "Key 5 is absent, so the supplied default is returned and the dictionary is unchanged.",
+   "4": "popitem() removes the most recently inserted pair and returns it as a (key, value) tuple.",
+   "5": "del d1[1] removes the pair and returns nothing.",
+   "6": "clear() empties the dictionary in place; d1 is still the same object, just with no pairs.",
+   "7": "Without a default, pop on a missing key raises KeyError."
+  }
+ },
+ {
+  "id": "comp_loop",
+  "title": "Comprehension = loop + filter",
+  "section": "§4.3",
+  "blurb": "{x: y for x, y in l1 if x % 2 == 0} does exactly what this loop does: unpack, test, insert.",
+  "code": [
+   "l1 = [(1, 'ONE'), (2, 'TWO'), (3, 'THREE'), (4, 'FOUR')]",
+   "d1 = {}",
+   "for x, y in l1:",
+   "    if x % 2 == 0:",
+   "        d1[x] = y"
+  ],
+  "notes": {
+   "1": "Four (key, value) tuples.",
+   "2": "Start with an empty dictionary; a comprehension builds this for you.",
+   "3": "Unpack the next tuple into x and y (the 'for x, y in ...' part of the comprehension).",
+   "4": "The filter: only even keys pass (the 'if ...' part of the comprehension).",
+   "5": "Reached only when the filter is true: the pair is inserted."
+  }
+ },
+ {
+  "id": "login",
+  "title": "Login Tracker",
+  "section": "§7.1",
+  "blurb": "Count how often each user logs in: increment if the key exists, otherwise start at 1.",
+  "code": [
+   "users = ['john', 'bob', 'alex', 'alice', 'charlie', 'john', 'alex', 'alice', 'john', 'alex']",
+   "logins = {}",
+   "for user in users:",
+   "    if user in logins:",
+   "        logins[user] += 1",
+   "    else:",
+   "        logins[user] = 1",
+   "for user, count in logins.items():",
+   "    print(f\"{user:8} : {count} logins\")"
+  ],
+  "notes": {
+   "1": "Ten login events; some users appear several times.",
+   "2": "An empty dictionary that will map username to count.",
+   "3": "Take the next username from the event list.",
+   "4": "Is this username already a key?",
+   "5": "Yes: read the old count, add 1, store it back.",
+   "7": "No: first login seen, so insert the key with count 1.",
+   "8": "Second loop: walk the finished counts as (user, count) pairs.",
+   "9": "{user:8} pads the name to 8 characters so the colons line up."
+  }
+ },
+ {
+  "id": "invert",
+  "title": "Invert a Dictionary",
+  "section": "§7.2",
+  "blurb": "Swap keys and values. Several keys can share a value, so each new value is a SET of original keys.",
+  "code": [
+   "original = {'a': 1, 'b': 2, 'c': 1, 'd': 2, 'e': 3, 'f': 2}",
+   "inverted = {}",
+   "for key, value in original.items():",
+   "    if value in inverted:",
+   "        inverted[value].add(key)",
+   "    else:",
+   "        inverted[value] = {key}",
+   "print(\"Inverted Dict:\", inverted)"
+  ],
+  "notes": {
+   "1": "Six pairs; values 1, 2 and 3 are shared by several keys.",
+   "2": "An empty dictionary for the inverted result.",
+   "3": "Take the next (key, value) pair of the original.",
+   "4": "Has this VALUE already been seen as a key of the inverted dictionary?",
+   "5": "Yes: add the original key to the existing set.",
+   "7": "No: create a new one-element set holding the key.",
+   "8": "Every original key now sits in the set of its value."
+  }
+ },
+ {
+  "id": "iso_yes",
+  "title": "Isomorphic: 'uff' vs 'bee' ✅",
+  "section": "§7.3",
+  "blurb": "Two dictionaries check the character mapping in both directions; no conflict means the strings are isomorphic.",
+  "code": [
+   "str1, str2 = 'uff', 'bee'",
+   "flag = True",
+   "if len(str1) != len(str2):",
+   "    flag = False",
+   "else:",
+   "    map1, map2 = {}, {}",
+   "    for i in range(len(str1)):",
+   "        if (str1[i] in map1) and (map1[str1[i]] != str2[i]):",
+   "            flag = False",
+   "            break",
+   "        else:",
+   "            map1[str1[i]] = str2[i]",
+   "        if (str2[i] in map2) and (map2[str2[i]] != str1[i]):",
+   "            flag = False",
+   "            break",
+   "        else:",
+   "            map2[str2[i]] = str1[i]",
+   "print(map1, map2)",
+   "if flag:",
+   "    print('Isomorphic String')",
+   "else:",
+   "    print('Not a Isomorphic String')"
+  ],
+  "notes": {
+   "1": "The two strings to compare.",
+   "2": "Assume isomorphic until a conflict is found.",
+   "3": "Different lengths can never be isomorphic.",
+   "6": "Equal lengths: two empty dictionaries, map1 for str1 → str2 and map2 for str2 → str1.",
+   "7": "Walk the positions of the strings.",
+   "8": "Forward check: was str1[i] already mapped to a DIFFERENT letter?",
+   "9": "Conflict found: the mapping is not one-to-one.",
+   "10": "Stop the loop at the first conflict.",
+   "12": "No conflict: record str1[i] → str2[i].",
+   "13": "Backward check: was str2[i] already produced by a DIFFERENT letter of str1?",
+   "14": "Conflict found: two different letters would map to the same letter.",
+   "15": "Stop the loop at the first conflict.",
+   "17": "No conflict: record str2[i] → str1[i].",
+   "18": "Show both mappings as they stand.",
+   "19": "flag still True means no conflict was found.",
+   "20": "Both directions were consistent.",
+   "22": "A conflict was found."
+  }
+ },
+ {
+  "id": "iso_no",
+  "title": "Isomorphic: 'sky' vs 'bee' ❌",
+  "section": "§7.3",
+  "blurb": "Same program, different strings: 'k' and 'y' would both have to map to 'e', which map2 catches.",
+  "code": [
+   "str1, str2 = 'sky', 'bee'",
+   "flag = True",
+   "if len(str1) != len(str2):",
+   "    flag = False",
+   "else:",
+   "    map1, map2 = {}, {}",
+   "    for i in range(len(str1)):",
+   "        if (str1[i] in map1) and (map1[str1[i]] != str2[i]):",
+   "            flag = False",
+   "            break",
+   "        else:",
+   "            map1[str1[i]] = str2[i]",
+   "        if (str2[i] in map2) and (map2[str2[i]] != str1[i]):",
+   "            flag = False",
+   "            break",
+   "        else:",
+   "            map2[str2[i]] = str1[i]",
+   "print(map1, map2)",
+   "if flag:",
+   "    print('Isomorphic String')",
+   "else:",
+   "    print('Not a Isomorphic String')"
+  ],
+  "notes": {
+   "1": "The two strings to compare.",
+   "2": "Assume isomorphic until a conflict is found.",
+   "3": "Different lengths can never be isomorphic.",
+   "6": "Equal lengths: two empty dictionaries, map1 for str1 → str2 and map2 for str2 → str1.",
+   "7": "Walk the positions of the strings.",
+   "8": "Forward check: was str1[i] already mapped to a DIFFERENT letter?",
+   "9": "Conflict found: the mapping is not one-to-one.",
+   "10": "Stop the loop at the first conflict.",
+   "12": "No conflict: record str1[i] → str2[i].",
+   "13": "Backward check: was str2[i] already produced by a DIFFERENT letter of str1?",
+   "14": "Conflict found: two different letters would map to the same letter.",
+   "15": "Stop the loop at the first conflict.",
+   "17": "No conflict: record str2[i] → str1[i].",
+   "18": "Show both mappings as they stand.",
+   "19": "flag still True means no conflict was found.",
+   "20": "Both directions were consistent.",
+   "22": "A conflict was found."
+  }
+ },
+ {
+  "id": "nested",
+  "title": "Nested lists → dictionaries",
+  "section": "§7.4",
+  "blurb": "Group the rows of a table by each column. Every row list is shared between the three dictionaries.",
+  "code": [
+   "header = ['name', 'age', 'city']",
+   "data = [['James', 25, 'NY'], ['Kiran', 30, 'DEL'], ['Smith', 24, 'PAR'], ['Raj', 27, 'DEL']]",
+   "result = []",
+   "names = {}",
+   "ages = {}",
+   "cities = {}",
+   "for employee in data:",
+   "    if employee[0] not in names:",
+   "        names[employee[0]] = [employee]",
+   "    else:",
+   "        names[employee[0]].append(employee)",
+   "    if employee[1] not in ages:",
+   "        ages[employee[1]] = [employee]",
+   "    else:",
+   "        ages[employee[1]].append(employee)",
+   "    if employee[2] not in cities:",
+   "        cities[employee[2]] = [employee]",
+   "    else:",
+   "        cities[employee[2]].append(employee)",
+   "result.append(names)",
+   "result.append(ages)",
+   "result.append(cities)"
+  ],
+  "notes": {
+   "1": "The column names (not used for the lookups themselves).",
+   "2": "Four rows; each row is a list [name, age, city]. (Written on one line here so each statement is one step.)",
+   "3": "A list that will collect the three dictionaries.",
+   "4": "Dictionary for lookups by name.",
+   "5": "Dictionary for lookups by age.",
+   "6": "Dictionary for lookups by city.",
+   "7": "Take the next row. The same row object will be stored in all three dictionaries.",
+   "8": "Is this name already a key of names?",
+   "9": "New name: start a list holding this row.",
+   "11": "Name seen before: append the row to that key's list.",
+   "12": "Is this age already a key of ages?",
+   "13": "New age: start a list holding this row.",
+   "15": "Age seen before: append the row to that key's list.",
+   "16": "Is this city already a key of cities?",
+   "17": "New city: start a list holding this row.",
+   "19": "City seen before: append the row to that key's list - this is why 'DEL' ends up with two rows.",
+   "20": "Store the names dictionary in result.",
+   "21": "Store the ages dictionary in result.",
+   "22": "Store the cities dictionary in result."
+  }
+ },
+ {
+  "id": "uuid_keys",
+  "title": "Dynamic keys with uuid5",
+  "section": "§7.5",
+  "blurb": "uuid5(namespace, name) turns each item name into the same short key every time it runs.",
+  "code": [
+   "import uuid",
+   "items = [['laptop', 1200], ['mouse', 20], ['keyboard', 30], ['tablet', 200]]",
+   "item_data = {}",
+   "for item in items:",
+   "    item_data[uuid.uuid5(uuid.NAMESPACE_OID, item[0]).hex[:6]] = item",
+   "print(\"Item Data:\")",
+   "for k, v in item_data.items():",
+   "    print(f\"{k}: {v}\")"
+  ],
+  "notes": {
+   "1": "Load the uuid module.",
+   "2": "Four items, each a [name, price] list.",
+   "3": "An empty dictionary for the generated keys.",
+   "4": "Take the next [name, price] list.",
+   "5": "uuid5 hashes the namespace + the name (SHA-1); .hex[:6] keeps the first six hex characters as the key; the item list becomes the value.",
+   "6": "Heading line.",
+   "7": "Walk the generated (key, item) pairs.",
+   "8": "Print each generated key with its item."
+  }
+ },
+ {
+  "id": "method",
+  "title": "Method.py: building a dict from enumerate",
+  "section": "§7.6",
+  "blurb": "Each pair from enumerate(range(2)) feeds two inserts: key = index, then key = value + 7.",
+  "code": [
+   "D = dict()",
+   "for x in enumerate(range(2)):",
+   "    print(x)",
+   "    print(x[0], x[1])",
+   "    D[x[0]] = x[1]",
+   "    print((x[1]+7), x[0])",
+   "    D[x[1]+7] = x[0]",
+   "    print(D)",
+   "    print(\"===========\")",
+   "print(D)"
+  ],
+  "notes": {
+   "1": "An empty dictionary.",
+   "2": "enumerate(range(2)) yields (index, value) tuples: (0, 0), then (1, 1).",
+   "3": "x is the whole tuple.",
+   "4": "x[0] is the index, x[1] is the value.",
+   "5": "First insert: key = x[0] (the index), value = x[1].",
+   "6": "The key for the second insert is x[1] + 7; its value is x[0].",
+   "7": "Second insert: key = x[1] + 7, value = x[0].",
+   "8": "D after this pass.",
+   "9": "Separator between passes.",
+   "10": "Final dictionary: four pairs, two per pass."
+  }
+ }
+]
