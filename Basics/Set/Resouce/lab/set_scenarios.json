@@ -1,0 +1,150 @@
+[
+ {
+  "id": "build",
+  "title": "Watching a set being built",
+  "section": "§2 · Lecture 127",
+  "blurb": "Each add() hashes the value to a slot, so the printed order is the slot order – not the insertion order – and it can reshuffle when the table grows.",
+  "code": [
+   "s = set()",
+   "s.add(10)",
+   "s.add(20)",
+   "s.add(30)",
+   "s.add(40)",
+   "s.add(50)",
+   "s.add(60)",
+   "s.add(70)",
+   "print(s)"
+  ],
+  "notes": {
+   "1": "set() creates an empty set. Note: {} would have created an empty dict.",
+   "2": "10 is hashed to a slot. With one element there is nothing to order yet.",
+   "3": "20 lands in its own slot, found by hashing – no index was ever chosen by you.",
+   "4": "30 is added. Python places it by hash, not at the 'end'.",
+   "5": "40 is added. Compare the printed order with the insertion order 10, 20, 30, 40.",
+   "6": "50 is added. The set now has 5 elements.",
+   "7": "60 is added. The table is getting full; Python may grow it soon, which re-places every element.",
+   "8": "70 is added. After a resize the iteration order can change completely.",
+   "9": "print shows the elements in slot order – this is the real iteration order, not insertion order."
+  }
+ },
+ {
+  "id": "hashable",
+  "title": "Only hashable elements",
+  "section": "§1.3 · Lecture 126",
+  "blurb": "A set can hold mixed immutable types, but a list (mutable, unhashable) is refused. (String positions can differ between runs because Python randomises string hashes.)",
+  "code": [
+   "S = {10, 20, 30}",
+   "S.add('hi')",
+   "S.add((1, 2, 3))",
+   "S.add(20)",
+   "S.add([1, 2, 3])"
+  ],
+  "notes": {
+   "1": "A set of three integers.",
+   "2": "A string is immutable and hashable, so it is accepted. Sets are heterogeneous.",
+   "3": "A tuple of immutables is hashable, so the whole tuple becomes ONE element.",
+   "4": "20 is already present, so nothing changes – sets never keep duplicates, and no error is raised.",
+   "5": "A list is mutable and has no hash, so Python refuses it. Use a tuple instead: S.add((1, 2, 3))."
+  }
+ },
+ {
+  "id": "addremove",
+  "title": "add, remove, discard, pop",
+  "section": "§5 · Lecture 132",
+  "blurb": "remove() raises KeyError for a missing value, discard() stays silent, and pop() takes an arbitrary element. (String positions can differ between runs because Python randomises string hashes.)",
+  "code": [
+   "S9 = {1, 2, 3, 4, 5}",
+   "S9.add('hi')",
+   "S9.remove(2)",
+   "S9.discard(10)",
+   "S9.discard(3)",
+   "x = S9.pop()",
+   "S9.remove(10)"
+  ],
+  "notes": {
+   "1": "Notebook cell [20]: a set of five integers.",
+   "2": "add() inserts exactly one element. 'hi' is placed by hash, not at the end.",
+   "3": "2 exists, so remove() deletes it.",
+   "4": "10 is not in the set. discard() ignores it silently.",
+   "5": "3 exists, so discard() deletes it.",
+   "6": "pop() takes no argument and removes an ARBITRARY element, returning it into x. Here it was the first element in slot order.",
+   "7": "10 is not in the set. remove() raises KeyError, so wrap it in try/except or use discard()."
+  }
+ },
+ {
+  "id": "setops",
+  "title": "Operations: new set vs update",
+  "section": "§4 · Lectures 129–131",
+  "blurb": "union, intersection, difference and symmetric_difference return NEW sets. The _update variants change the set in place and return None.",
+  "code": [
+   "s1 = {1, 2, 3, 5, 7}",
+   "s2 = {5, 7, 9, 10, 11}",
+   "u = s1.union(s2)",
+   "i = s1.intersection(s2)",
+   "d = s1.difference(s2)",
+   "d2 = s2.difference(s1)",
+   "x = s1.symmetric_difference(s2)",
+   "s1.intersection_update(s2)",
+   "s1 = {1, 2, 3, 5, 7}",
+   "r = s1.difference_update(s2)"
+  ],
+  "notes": {
+   "1": "The first set from the lectures.",
+   "2": "The second set shares 5 and 7 with the first.",
+   "3": "union() builds a NEW set with every element once. s1 and s2 are untouched.",
+   "4": "intersection() keeps only the common elements 5 and 7, in a new set.",
+   "5": "difference() keeps elements of s1 that are not in s2.",
+   "6": "Difference is not commutative: s2 - s1 gives a different result.",
+   "7": "symmetric_difference() keeps elements that are in exactly one of the two sets.",
+   "8": "intersection_update() changes s1 IN PLACE: it now holds only 5 and 7. Nothing is returned.",
+   "9": "Rebind s1 to a fresh set so the next example starts clean.",
+   "10": "difference_update() modifies s1 in place and returns None – so r is None. Never write s1 = s1.difference_update(s2)."
+  }
+ },
+ {
+  "id": "copy",
+  "title": "Alias vs copy() vs update()",
+  "section": "§5 · Lecture 132",
+  "blurb": "alias = S1 is the SAME set with a second name; S1.copy() is an independent set. update() adds each item of an iterable.",
+  "code": [
+   "S1 = {10, 20, 30}",
+   "alias = S1",
+   "dup = S1.copy()",
+   "S1.add(40)",
+   "S1.update([60, 70])",
+   "print(alias)",
+   "print(dup)",
+   "S1.clear()",
+   "print(alias)"
+  ],
+  "notes": {
+   "1": "A set of three integers.",
+   "2": "No copy: alias points to the very same set object.",
+   "3": "copy() creates a NEW, independent set with the same elements.",
+   "4": "add() changes the one set that S1 and alias both name. dup is unaffected.",
+   "5": "update() adds each item of the list separately: 60 and 70, not the list itself.",
+   "6": "alias shows every change made through S1.",
+   "7": "dup still has only the original three elements.",
+   "8": "clear() empties the shared set. S1 is still a set – it prints as set(), not {}.",
+   "9": "alias is empty too, because it is the same object."
+  }
+ },
+ {
+  "id": "comp",
+  "title": "Set comprehension, step by step",
+  "section": "§6 · Lecture 133",
+  "blurb": "A set comprehension is a loop that adds each result to a set – duplicates collapse automatically. {x**2 for x in [...]} builds exactly this set in one line.",
+  "code": [
+   "S = set()",
+   "for x in [-2, -1, 0, 1, 2]:",
+   "    S.add(x**2)",
+   "print(S)"
+  ],
+  "notes": {
+   "1": "Start with an empty set.",
+   "2": "The loop takes the next value from the list and stores it in x.",
+   "3": "x**2 is added. If the square is already in the set (4 and 1 appear twice), nothing changes – no error, no duplicate.",
+   "4": "S is {0, 1, 4}. The one-line form {x**2 for x in [-2, -1, 0, 1, 2]} gives the same set."
+  }
+ }
+]
