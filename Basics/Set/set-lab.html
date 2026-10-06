@@ -1,0 +1,283 @@
+<title>Set Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: scenario rail on top, then code (left) beside memory (right), explanation + console under memory; controls stick to the code panel. */
+:root{
+  --bg:#f3f5f9; --surface:#ffffff; --sunk:#e9edf4; --line:#d5dbe6;
+  --fg:#1b2333; --muted:#5d6779; --accent:#2747c9; --accent-fg:#ffffff;
+  --code-bg:#151b28; --code-fg:#dfe5f0; --code-muted:#6f7a8f;
+  --pending:#f2b632; --pending-soft:#fff3d4; --done:#1f9d6b; --done-soft:#dcf5ea;
+  --err:#c73b2c; --err-soft:#fde5e1;
+  --o1:#2747c9; --o2:#0e8a83; --o3:#7a3fc4; --o4:#c2410c; --o5:#b0256f;
+  --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f131b; --surface:#171d29; --sunk:#1e2533; --line:#2c3547;
+  --fg:#e6eaf2; --muted:#9aa4b7; --accent:#7f9bff; --accent-fg:#0f131b;
+  --code-bg:#0b0f16; --code-fg:#dfe5f0; --code-muted:#5f6a7e;
+  --pending:#f2b632; --pending-soft:#3a3018; --done:#3cc48e; --done-soft:#143327;
+  --err:#ff7b6b; --err-soft:#3b1c18;
+  --o1:#7f9bff; --o2:#3cc4bb; --o3:#b48bff; --o4:#ff9a5c; --o5:#ff7ab8; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f131b; --surface:#171d29; --sunk:#1e2533; --line:#2c3547;
+  --fg:#e6eaf2; --muted:#9aa4b7; --accent:#7f9bff; --accent-fg:#0f131b;
+  --code-bg:#0b0f16; --code-fg:#dfe5f0; --code-muted:#5f6a7e;
+  --pending:#f2b632; --pending-soft:#3a3018; --done:#3cc48e; --done-soft:#143327;
+  --err:#ff7b6b; --err-soft:#3b1c18;
+  --o1:#7f9bff; --o2:#3cc4bb; --o3:#b48bff; --o4:#ff9a5c; --o5:#ff7ab8; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--body);margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:22px 40px;display:grid;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
+h1{font:700 clamp(26px,3.2vw,34px)/1.1 var(--display);margin:0;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted);max-width:62ch}
+.rail{display:flex;flex-wrap:wrap;gap:8px}
+.rail button{font:500 14px var(--body);color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer;display:inline-flex;gap:8px;align-items:baseline}
+.rail button small{font:12px var(--mono);color:var(--muted)}
+.rail button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.rail button[aria-selected="true"] small{color:inherit;opacity:.8}
+.rail button:focus-visible,.ctl button:focus-visible,select:focus-visible{outline:3px solid var(--pending);outline-offset:2px}
+.blurb{margin:0;color:var(--muted)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:18px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;min-width:0}
+.panel h2{font:600 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0;padding:12px 16px 0}
+/* code */
+.code{background:var(--code-bg);border-radius:12px;overflow:hidden}
+.code ol{list-style:none;margin:0;padding:14px 0;font:14px/1.9 var(--mono);color:var(--code-fg);overflow-x:auto}
+.code li{display:grid;grid-template-columns:48px 22px auto;align-items:center;white-space:pre;padding-right:16px;border-left:4px solid transparent}
+.code li .n{color:var(--code-muted);text-align:right;padding-right:10px}
+.code li .mk{font-size:12px;color:var(--code-muted)}
+.code li.ready{background:rgba(242,182,50,.16);border-left-color:var(--pending)}
+.code li.ready .mk{color:var(--pending)}
+.code li.ran{background:rgba(60,196,142,.16);border-left-color:var(--done)}
+.code li.ran .mk{color:var(--done)}
+.code li.bad{background:rgba(255,123,107,.18);border-left-color:var(--err)}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 14px;border-top:1px solid #ffffff14;background:#ffffff08}
+.ctl button{font:600 14px var(--body);border-radius:8px;border:1px solid #ffffff2a;background:#ffffff10;color:var(--code-fg);padding:8px 13px;cursor:pointer}
+.ctl button:disabled{opacity:.4;cursor:default}
+.ctl .go{background:var(--pending);border-color:var(--pending);color:#1b1503;min-width:150px}
+.ctl .go.next{background:var(--done);border-color:var(--done);color:#04150e}
+.ctl .spacer{flex:1}
+.ctl label{color:var(--code-muted);font:12px var(--mono);display:flex;gap:6px;align-items:center}
+.ctl select{font:12px var(--mono);background:#ffffff10;color:var(--code-fg);border:1px solid #ffffff2a;border-radius:6px;padding:4px}
+.prog{font:12px var(--mono);color:var(--code-muted);padding:0 16px 12px}
+.bar{height:4px;background:#ffffff14;margin:0 16px 10px;border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pending);width:0;transition:width .3s}
+/* memory */
+.mem{padding:6px 16px 16px;display:grid;gap:14px}
+.names{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;font:14px var(--mono)}
+.names .k{color:var(--muted);text-align:right}
+.chip{display:inline-flex;align-items:center;gap:6px;font:600 13px var(--mono);padding:2px 9px;border-radius:999px;border:1.5px solid currentColor}
+.val{font:14px var(--mono)}
+.obj{display:grid;gap:4px}
+.obj .hd{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font:12px var(--mono);color:var(--muted)}
+.obj .hd .tag{font-weight:600}
+.badge{font:600 11px var(--body);letter-spacing:.04em;text-transform:uppercase;padding:1px 7px;border-radius:4px;background:var(--done-soft);color:var(--done)}
+.cells{display:flex;flex-wrap:wrap;gap:0;overflow-x:auto;padding-bottom:2px}
+.cell{display:grid;grid-template-rows:auto 40px auto;text-align:center;min-width:52px}
+.cell .ix{font:11px var(--mono);color:var(--muted);line-height:1.6}
+.cell .bx{display:grid;place-items:center;border:1.5px solid var(--line);margin-left:-1.5px;background:var(--sunk);font:600 15px var(--mono);padding:0 6px}
+.cell:first-child .bx{border-radius:7px 0 0 7px;margin-left:0}
+.cell:last-child .bx{border-radius:0 7px 7px 0}
+.cell .bx.chg{background:var(--pending-soft);border-color:var(--pending);position:relative;z-index:1}
+.cell .bx.new{background:var(--done-soft);border-color:var(--done);position:relative;z-index:1}
+.cell .bx .ref{font-size:12px}
+.empty{font:13px var(--mono);color:var(--muted);padding:10px 0}
+.was{font:12px var(--mono);color:var(--muted)}
+.was s{text-decoration-color:var(--err)}
+.explain{padding:14px 16px;display:grid;gap:8px}
+.explain .state{font:600 12px var(--body);letter-spacing:.06em;text-transform:uppercase}
+.explain .state.ready{color:#a87300}
+:root:not([data-theme="light"]) .explain .state.ready{color:var(--pending)}
+.explain .state.ran{color:var(--done)}
+.explain p{margin:0;max-width:65ch}
+.err{background:var(--err-soft);color:var(--err);border-radius:8px;padding:8px 12px;font:600 13px var(--mono)}
+.console{background:var(--code-bg);color:var(--code-fg);border-radius:10px;font:13px/1.6 var(--mono);padding:10px 14px;min-height:46px;white-space:pre-wrap;overflow-x:auto;margin:0 16px 16px}
+.console .ph{color:var(--code-muted)}
+.console .fresh{color:var(--done)}
+.foot{color:var(--muted);font-size:13px}
+kbd{font:12px var(--mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--surface)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@keyframes pop{from{transform:scale(.86)}to{transform:scale(1)}}
+.cell .bx.chg,.cell .bx.new{animation:pop .25s ease-out}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Set Lab</h1>
+    <p>Run each line yourself. The yellow line is about to run; press <b>Run line</b> to execute it and see what changed, then <b>Next line</b>.</p>
+  </header>
+  <nav class="rail" id="rail" role="tablist" aria-label="Examples"></nav>
+  <p class="blurb" id="blurb"></p>
+  <div class="grid">
+    <section class="code" aria-label="Code">
+      <ol id="code"></ol>
+      <div class="bar"><i id="bar"></i></div>
+      <div class="prog" id="prog"></div>
+      <div class="ctl">
+        <button id="back" title="Back (←)">◀ Back</button>
+        <button id="go" class="go">▶ Run line</button>
+        <button id="reset" title="Start over">↺ Reset</button>
+        <span class="spacer"></span>
+        <button id="auto" aria-pressed="false">⏵ Auto</button>
+        <label for="speed">speed <select id="speed"><option value="2600">slow</option><option value="1600" selected>normal</option><option value="900">fast</option></select></label>
+      </div>
+    </section>
+    <div style="display:grid;gap:18px;min-width:0">
+      <section class="panel" aria-label="Memory">
+        <h2>Variables &amp; objects in memory</h2>
+        <div class="mem" id="mem"></div>
+      </section>
+      <section class="panel" aria-live="polite">
+        <div class="explain" id="explain"></div>
+        <h2 style="padding-top:0">Output</h2>
+        <div style="height:8px"></div>
+        <pre class="console" id="console"></pre>
+      </section>
+    </div>
+  </div>
+  <p class="foot">Keys: <kbd>Space</kbd> or <kbd>→</kbd> run / next · <kbd>←</kbd> back · <kbd>R</kbd> reset. Every state shown here was recorded by running the code in Python 3.13 (the list-element error text is the Python 3.14 wording from your notebook). Part of the <em>Python Sets - Complete Guide</em> Confluence page.</p>
+</div>
+
+<script>
+const DATA = [{"id": "build", "title": "Watching a set being built", "section": "\u00a72 \u00b7 Lecture 127", "blurb": "Each add() hashes the value to a slot, so the printed order is the slot order \u2013 not the insertion order \u2013 and it can reshuffle when the table grows.", "code": ["s = set()", "s.add(10)", "s.add(20)", "s.add(30)", "s.add(40)", "s.add(50)", "s.add(60)", "s.add(70)", "print(s)"], "steps": [{"line": 0, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": []}, "kinds": {"#1": "set"}}, "out": "", "note": "set() creates an empty set. Note: {} would have created an empty dict."}, {"line": 1, "before": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": []}, "kinds": {"#1": "set"}}, "after": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "10 is hashed to a slot. With one element there is nothing to order yet."}, {"line": 2, "before": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "20 lands in its own slot, found by hashing \u2013 no index was ever chosen by you."}, {"line": 3, "before": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "30 is added. Python places it by hash, not at the 'end'."}, {"line": 4, "before": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": [{"v": "40"}, {"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "40 is added. Compare the printed order with the insertion order 10, 20, 30, 40."}, {"line": 5, "before": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": [{"v": "40"}, {"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": [{"v": "40"}, {"v": "10"}, {"v": "50"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "50 is added. The set now has 5 elements."}, {"line": 6, "before": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": [{"v": "40"}, {"v": "10"}, {"v": "50"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": [{"v": "40"}, {"v": "10"}, {"v": "50"}, {"v": "20"}, {"v": "60"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "60 is added. The table is getting full; Python may grow it soon, which re-places every element."}, {"line": 7, "before": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": [{"v": "40"}, {"v": "10"}, {"v": "50"}, {"v": "20"}, {"v": "60"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": [{"v": "70"}, {"v": "40"}, {"v": "10"}, {"v": "50"}, {"v": "20"}, {"v": "60"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "70 is added. After a resize the iteration order can change completely."}, {"line": 8, "before": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": [{"v": "70"}, {"v": "40"}, {"v": "10"}, {"v": "50"}, {"v": "20"}, {"v": "60"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"s": {"ref": "#1"}}, "heap": {"#1": [{"v": "70"}, {"v": "40"}, {"v": "10"}, {"v": "50"}, {"v": "20"}, {"v": "60"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "out": "{70, 40, 10, 50, 20, 60, 30}\n", "note": "print shows the elements in slot order \u2013 this is the real iteration order, not insertion order."}]}, {"id": "hashable", "title": "Only hashable elements", "section": "\u00a71.3 \u00b7 Lecture 126", "blurb": "A set can hold mixed immutable types, but a list (mutable, unhashable) is refused. (String positions can differ between runs because Python randomises string hashes.)", "code": ["S = {10, 20, 30}", "S.add('hi')", "S.add((1, 2, 3))", "S.add(20)", "S.add([1, 2, 3])"], "steps": [{"line": 0, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {"S": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "A set of three integers."}, {"line": 1, "before": {"names": {"S": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "'hi'"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "A string is immutable and hashable, so it is accepted. Sets are heterogeneous."}, {"line": 2, "before": {"names": {"S": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "'hi'"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"ref": "#2"}, {"v": "20"}, {"v": "'hi'"}, {"v": "30"}], "#2": [{"v": "1"}, {"v": "2"}, {"v": "3"}]}, "kinds": {"#1": "set", "#2": "tuple"}}, "out": "", "note": "A tuple of immutables is hashable, so the whole tuple becomes ONE element."}, {"line": 3, "before": {"names": {"S": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"ref": "#2"}, {"v": "20"}, {"v": "'hi'"}, {"v": "30"}], "#2": [{"v": "1"}, {"v": "2"}, {"v": "3"}]}, "kinds": {"#1": "set", "#2": "tuple"}}, "after": {"names": {"S": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"ref": "#2"}, {"v": "20"}, {"v": "'hi'"}, {"v": "30"}], "#2": [{"v": "1"}, {"v": "2"}, {"v": "3"}]}, "kinds": {"#1": "set", "#2": "tuple"}}, "out": "", "note": "20 is already present, so nothing changes \u2013 sets never keep duplicates, and no error is raised."}, {"line": 4, "before": {"names": {"S": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"ref": "#2"}, {"v": "20"}, {"v": "'hi'"}, {"v": "30"}], "#2": [{"v": "1"}, {"v": "2"}, {"v": "3"}]}, "kinds": {"#1": "set", "#2": "tuple"}}, "after": {"names": {"S": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"ref": "#2"}, {"v": "20"}, {"v": "'hi'"}, {"v": "30"}], "#2": [{"v": "1"}, {"v": "2"}, {"v": "3"}]}, "kinds": {"#1": "set", "#2": "tuple"}}, "out": "", "note": "A list is mutable and has no hash, so Python refuses it (message as shown by Python 3.14 in your notebook cell [18]). Use a tuple instead: S.add((1, 2, 3)).", "error": "TypeError: cannot use 'list' as a set element (unhashable type: 'list')"}]}, {"id": "addremove", "title": "add, remove, discard, pop", "section": "\u00a75 \u00b7 Lecture 132", "blurb": "remove() raises KeyError for a missing value, discard() stays silent, and pop() takes an arbitrary element. (String positions can differ between runs because Python randomises string hashes.)", "code": ["S9 = {1, 2, 3, 4, 5}", "S9.add('hi')", "S9.remove(2)", "S9.discard(10)", "S9.discard(3)", "x = S9.pop()", "S9.remove(10)"], "steps": [{"line": 0, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {"S9": {"ref": "#1"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "4"}, {"v": "5"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "Notebook cell [20]: a set of five integers."}, {"line": 1, "before": {"names": {"S9": {"ref": "#1"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "4"}, {"v": "5"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S9": {"ref": "#1"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "4"}, {"v": "5"}, {"v": "'hi'"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "add() inserts exactly one element. 'hi' is placed by hash, not at the end."}, {"line": 2, "before": {"names": {"S9": {"ref": "#1"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "4"}, {"v": "5"}, {"v": "'hi'"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S9": {"ref": "#1"}}, "heap": {"#1": [{"v": "1"}, {"v": "3"}, {"v": "4"}, {"v": "5"}, {"v": "'hi'"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "2 exists, so remove() deletes it."}, {"line": 3, "before": {"names": {"S9": {"ref": "#1"}}, "heap": {"#1": [{"v": "1"}, {"v": "3"}, {"v": "4"}, {"v": "5"}, {"v": "'hi'"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S9": {"ref": "#1"}}, "heap": {"#1": [{"v": "1"}, {"v": "3"}, {"v": "4"}, {"v": "5"}, {"v": "'hi'"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "10 is not in the set. discard() ignores it silently."}, {"line": 4, "before": {"names": {"S9": {"ref": "#1"}}, "heap": {"#1": [{"v": "1"}, {"v": "3"}, {"v": "4"}, {"v": "5"}, {"v": "'hi'"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S9": {"ref": "#1"}}, "heap": {"#1": [{"v": "1"}, {"v": "4"}, {"v": "5"}, {"v": "'hi'"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "3 exists, so discard() deletes it."}, {"line": 5, "before": {"names": {"S9": {"ref": "#1"}}, "heap": {"#1": [{"v": "1"}, {"v": "4"}, {"v": "5"}, {"v": "'hi'"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S9": {"ref": "#1"}, "x": {"v": "1"}}, "heap": {"#1": [{"v": "4"}, {"v": "5"}, {"v": "'hi'"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "pop() takes no argument and removes an ARBITRARY element, returning it into x. Here it was the first element in slot order."}, {"line": 6, "before": {"names": {"S9": {"ref": "#1"}, "x": {"v": "1"}}, "heap": {"#1": [{"v": "4"}, {"v": "5"}, {"v": "'hi'"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S9": {"ref": "#1"}, "x": {"v": "1"}}, "heap": {"#1": [{"v": "4"}, {"v": "5"}, {"v": "'hi'"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "10 is not in the set. remove() raises KeyError, so wrap it in try/except or use discard().", "error": "KeyError: 10"}]}, {"id": "setops", "title": "Operations: new set vs update", "section": "\u00a74 \u00b7 Lectures 129\u2013131", "blurb": "union, intersection, difference and symmetric_difference return NEW sets. The _update variants change the set in place and return None.", "code": ["s1 = {1, 2, 3, 5, 7}", "s2 = {5, 7, 9, 10, 11}", "u = s1.union(s2)", "i = s1.intersection(s2)", "d = s1.difference(s2)", "d2 = s2.difference(s1)", "x = s1.symmetric_difference(s2)", "s1.intersection_update(s2)", "s1 = {1, 2, 3, 5, 7}", "r = s1.difference_update(s2)"], "steps": [{"line": 0, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {"s1": {"ref": "#1"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "The first set from the lectures."}, {"line": 1, "before": {"names": {"s1": {"ref": "#1"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"s1": {"ref": "#1"}, "s2": {"ref": "#2"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}]}, "kinds": {"#1": "set", "#2": "set"}}, "out": "", "note": "The second set shares 5 and 7 with the first."}, {"line": 2, "before": {"names": {"s1": {"ref": "#1"}, "s2": {"ref": "#2"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}]}, "kinds": {"#1": "set", "#2": "set"}}, "after": {"names": {"s1": {"ref": "#1"}, "s2": {"ref": "#2"}, "u": {"ref": "#3"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#3": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}]}, "kinds": {"#1": "set", "#2": "set", "#3": "set"}}, "out": "", "note": "union() builds a NEW set with every element once. s1 and s2 are untouched."}, {"line": 3, "before": {"names": {"s1": {"ref": "#1"}, "s2": {"ref": "#2"}, "u": {"ref": "#3"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#3": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}]}, "kinds": {"#1": "set", "#2": "set", "#3": "set"}}, "after": {"names": {"s1": {"ref": "#1"}, "s2": {"ref": "#2"}, "u": {"ref": "#3"}, "i": {"ref": "#4"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#3": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#4": [{"v": "5"}, {"v": "7"}]}, "kinds": {"#1": "set", "#2": "set", "#3": "set", "#4": "set"}}, "out": "", "note": "intersection() keeps only the common elements 5 and 7, in a new set."}, {"line": 4, "before": {"names": {"s1": {"ref": "#1"}, "s2": {"ref": "#2"}, "u": {"ref": "#3"}, "i": {"ref": "#4"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#3": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#4": [{"v": "5"}, {"v": "7"}]}, "kinds": {"#1": "set", "#2": "set", "#3": "set", "#4": "set"}}, "after": {"names": {"s1": {"ref": "#1"}, "s2": {"ref": "#2"}, "u": {"ref": "#3"}, "i": {"ref": "#4"}, "d": {"ref": "#5"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#3": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#4": [{"v": "5"}, {"v": "7"}], "#5": [{"v": "1"}, {"v": "2"}, {"v": "3"}]}, "kinds": {"#1": "set", "#2": "set", "#3": "set", "#4": "set", "#5": "set"}}, "out": "", "note": "difference() keeps elements of s1 that are not in s2."}, {"line": 5, "before": {"names": {"s1": {"ref": "#1"}, "s2": {"ref": "#2"}, "u": {"ref": "#3"}, "i": {"ref": "#4"}, "d": {"ref": "#5"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#3": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#4": [{"v": "5"}, {"v": "7"}], "#5": [{"v": "1"}, {"v": "2"}, {"v": "3"}]}, "kinds": {"#1": "set", "#2": "set", "#3": "set", "#4": "set", "#5": "set"}}, "after": {"names": {"s1": {"ref": "#1"}, "s2": {"ref": "#2"}, "u": {"ref": "#3"}, "i": {"ref": "#4"}, "d": {"ref": "#5"}, "d2": {"ref": "#6"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#3": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#4": [{"v": "5"}, {"v": "7"}], "#5": [{"v": "1"}, {"v": "2"}, {"v": "3"}], "#6": [{"v": "9"}, {"v": "10"}, {"v": "11"}]}, "kinds": {"#1": "set", "#2": "set", "#3": "set", "#4": "set", "#5": "set", "#6": "set"}}, "out": "", "note": "Difference is not commutative: s2 - s1 gives a different result."}, {"line": 6, "before": {"names": {"s1": {"ref": "#1"}, "s2": {"ref": "#2"}, "u": {"ref": "#3"}, "i": {"ref": "#4"}, "d": {"ref": "#5"}, "d2": {"ref": "#6"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#3": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#4": [{"v": "5"}, {"v": "7"}], "#5": [{"v": "1"}, {"v": "2"}, {"v": "3"}], "#6": [{"v": "9"}, {"v": "10"}, {"v": "11"}]}, "kinds": {"#1": "set", "#2": "set", "#3": "set", "#4": "set", "#5": "set", "#6": "set"}}, "after": {"names": {"s1": {"ref": "#1"}, "s2": {"ref": "#2"}, "u": {"ref": "#3"}, "i": {"ref": "#4"}, "d": {"ref": "#5"}, "d2": {"ref": "#6"}, "x": {"ref": "#7"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#3": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#4": [{"v": "5"}, {"v": "7"}], "#5": [{"v": "1"}, {"v": "2"}, {"v": "3"}], "#6": [{"v": "9"}, {"v": "10"}, {"v": "11"}], "#7": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "9"}, {"v": "10"}, {"v": "11"}]}, "kinds": {"#1": "set", "#2": "set", "#3": "set", "#4": "set", "#5": "set", "#6": "set", "#7": "set"}}, "out": "", "note": "symmetric_difference() keeps elements that are in exactly one of the two sets."}, {"line": 7, "before": {"names": {"s1": {"ref": "#1"}, "s2": {"ref": "#2"}, "u": {"ref": "#3"}, "i": {"ref": "#4"}, "d": {"ref": "#5"}, "d2": {"ref": "#6"}, "x": {"ref": "#7"}}, "heap": {"#1": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#3": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#4": [{"v": "5"}, {"v": "7"}], "#5": [{"v": "1"}, {"v": "2"}, {"v": "3"}], "#6": [{"v": "9"}, {"v": "10"}, {"v": "11"}], "#7": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "9"}, {"v": "10"}, {"v": "11"}]}, "kinds": {"#1": "set", "#2": "set", "#3": "set", "#4": "set", "#5": "set", "#6": "set", "#7": "set"}}, "after": {"names": {"s1": {"ref": "#1"}, "s2": {"ref": "#2"}, "u": {"ref": "#3"}, "i": {"ref": "#4"}, "d": {"ref": "#5"}, "d2": {"ref": "#6"}, "x": {"ref": "#7"}}, "heap": {"#1": [{"v": "5"}, {"v": "7"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#3": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#4": [{"v": "5"}, {"v": "7"}], "#5": [{"v": "1"}, {"v": "2"}, {"v": "3"}], "#6": [{"v": "9"}, {"v": "10"}, {"v": "11"}], "#7": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "9"}, {"v": "10"}, {"v": "11"}]}, "kinds": {"#1": "set", "#2": "set", "#3": "set", "#4": "set", "#5": "set", "#6": "set", "#7": "set"}}, "out": "", "note": "intersection_update() changes s1 IN PLACE: it now holds only 5 and 7. Nothing is returned."}, {"line": 8, "before": {"names": {"s1": {"ref": "#1"}, "s2": {"ref": "#2"}, "u": {"ref": "#3"}, "i": {"ref": "#4"}, "d": {"ref": "#5"}, "d2": {"ref": "#6"}, "x": {"ref": "#7"}}, "heap": {"#1": [{"v": "5"}, {"v": "7"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#3": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#4": [{"v": "5"}, {"v": "7"}], "#5": [{"v": "1"}, {"v": "2"}, {"v": "3"}], "#6": [{"v": "9"}, {"v": "10"}, {"v": "11"}], "#7": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "9"}, {"v": "10"}, {"v": "11"}]}, "kinds": {"#1": "set", "#2": "set", "#3": "set", "#4": "set", "#5": "set", "#6": "set", "#7": "set"}}, "after": {"names": {"s1": {"ref": "#8"}, "s2": {"ref": "#2"}, "u": {"ref": "#3"}, "i": {"ref": "#4"}, "d": {"ref": "#5"}, "d2": {"ref": "#6"}, "x": {"ref": "#7"}}, "heap": {"#8": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#3": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#4": [{"v": "5"}, {"v": "7"}], "#5": [{"v": "1"}, {"v": "2"}, {"v": "3"}], "#6": [{"v": "9"}, {"v": "10"}, {"v": "11"}], "#7": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "9"}, {"v": "10"}, {"v": "11"}]}, "kinds": {"#8": "set", "#2": "set", "#3": "set", "#4": "set", "#5": "set", "#6": "set", "#7": "set"}}, "out": "", "note": "Rebind s1 to a fresh set so the next example starts clean."}, {"line": 9, "before": {"names": {"s1": {"ref": "#8"}, "s2": {"ref": "#2"}, "u": {"ref": "#3"}, "i": {"ref": "#4"}, "d": {"ref": "#5"}, "d2": {"ref": "#6"}, "x": {"ref": "#7"}}, "heap": {"#8": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#3": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#4": [{"v": "5"}, {"v": "7"}], "#5": [{"v": "1"}, {"v": "2"}, {"v": "3"}], "#6": [{"v": "9"}, {"v": "10"}, {"v": "11"}], "#7": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "9"}, {"v": "10"}, {"v": "11"}]}, "kinds": {"#8": "set", "#2": "set", "#3": "set", "#4": "set", "#5": "set", "#6": "set", "#7": "set"}}, "after": {"names": {"s1": {"ref": "#8"}, "s2": {"ref": "#2"}, "u": {"ref": "#3"}, "i": {"ref": "#4"}, "d": {"ref": "#5"}, "d2": {"ref": "#6"}, "x": {"ref": "#7"}, "r": {"v": "None"}}, "heap": {"#8": [{"v": "1"}, {"v": "2"}, {"v": "3"}], "#2": [{"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#3": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "5"}, {"v": "7"}, {"v": "9"}, {"v": "10"}, {"v": "11"}], "#4": [{"v": "5"}, {"v": "7"}], "#5": [{"v": "1"}, {"v": "2"}, {"v": "3"}], "#6": [{"v": "9"}, {"v": "10"}, {"v": "11"}], "#7": [{"v": "1"}, {"v": "2"}, {"v": "3"}, {"v": "9"}, {"v": "10"}, {"v": "11"}]}, "kinds": {"#8": "set", "#2": "set", "#3": "set", "#4": "set", "#5": "set", "#6": "set", "#7": "set"}}, "out": "", "note": "difference_update() modifies s1 in place and returns None \u2013 so r is None. Never write s1 = s1.difference_update(s2)."}]}, {"id": "copy", "title": "Alias vs copy() vs update()", "section": "\u00a75 \u00b7 Lecture 132", "blurb": "alias = S1 is the SAME set with a second name; S1.copy() is an independent set. update() adds each item of an iterable.", "code": ["S1 = {10, 20, 30}", "alias = S1", "dup = S1.copy()", "S1.add(40)", "S1.update([60, 70])", "print(alias)", "print(dup)", "S1.clear()", "print(alias)"], "steps": [{"line": 0, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {"S1": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "A set of three integers."}, {"line": 1, "before": {"names": {"S1": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S1": {"ref": "#1"}, "alias": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "No copy: alias points to the very same set object."}, {"line": 2, "before": {"names": {"S1": {"ref": "#1"}, "alias": {"ref": "#1"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S1": {"ref": "#1"}, "alias": {"ref": "#1"}, "dup": {"ref": "#2"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}], "#2": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set", "#2": "set"}}, "out": "", "note": "copy() creates a NEW, independent set with the same elements."}, {"line": 3, "before": {"names": {"S1": {"ref": "#1"}, "alias": {"ref": "#1"}, "dup": {"ref": "#2"}}, "heap": {"#1": [{"v": "10"}, {"v": "20"}, {"v": "30"}], "#2": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set", "#2": "set"}}, "after": {"names": {"S1": {"ref": "#1"}, "alias": {"ref": "#1"}, "dup": {"ref": "#2"}}, "heap": {"#1": [{"v": "40"}, {"v": "10"}, {"v": "20"}, {"v": "30"}], "#2": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set", "#2": "set"}}, "out": "", "note": "add() changes the one set that S1 and alias both name. dup is unaffected."}, {"line": 4, "before": {"names": {"S1": {"ref": "#1"}, "alias": {"ref": "#1"}, "dup": {"ref": "#2"}}, "heap": {"#1": [{"v": "40"}, {"v": "10"}, {"v": "20"}, {"v": "30"}], "#2": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set", "#2": "set"}}, "after": {"names": {"S1": {"ref": "#1"}, "alias": {"ref": "#1"}, "dup": {"ref": "#2"}}, "heap": {"#1": [{"v": "70"}, {"v": "40"}, {"v": "10"}, {"v": "20"}, {"v": "60"}, {"v": "30"}], "#2": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set", "#2": "set"}}, "out": "", "note": "update() adds each item of the list separately: 60 and 70, not the list itself."}, {"line": 5, "before": {"names": {"S1": {"ref": "#1"}, "alias": {"ref": "#1"}, "dup": {"ref": "#2"}}, "heap": {"#1": [{"v": "70"}, {"v": "40"}, {"v": "10"}, {"v": "20"}, {"v": "60"}, {"v": "30"}], "#2": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set", "#2": "set"}}, "after": {"names": {"S1": {"ref": "#1"}, "alias": {"ref": "#1"}, "dup": {"ref": "#2"}}, "heap": {"#1": [{"v": "70"}, {"v": "40"}, {"v": "10"}, {"v": "20"}, {"v": "60"}, {"v": "30"}], "#2": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set", "#2": "set"}}, "out": "{70, 40, 10, 20, 60, 30}\n", "note": "alias shows every change made through S1."}, {"line": 6, "before": {"names": {"S1": {"ref": "#1"}, "alias": {"ref": "#1"}, "dup": {"ref": "#2"}}, "heap": {"#1": [{"v": "70"}, {"v": "40"}, {"v": "10"}, {"v": "20"}, {"v": "60"}, {"v": "30"}], "#2": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set", "#2": "set"}}, "after": {"names": {"S1": {"ref": "#1"}, "alias": {"ref": "#1"}, "dup": {"ref": "#2"}}, "heap": {"#1": [{"v": "70"}, {"v": "40"}, {"v": "10"}, {"v": "20"}, {"v": "60"}, {"v": "30"}], "#2": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set", "#2": "set"}}, "out": "{10, 20, 30}\n", "note": "dup still has only the original three elements."}, {"line": 7, "before": {"names": {"S1": {"ref": "#1"}, "alias": {"ref": "#1"}, "dup": {"ref": "#2"}}, "heap": {"#1": [{"v": "70"}, {"v": "40"}, {"v": "10"}, {"v": "20"}, {"v": "60"}, {"v": "30"}], "#2": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set", "#2": "set"}}, "after": {"names": {"S1": {"ref": "#1"}, "alias": {"ref": "#1"}, "dup": {"ref": "#2"}}, "heap": {"#1": [], "#2": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set", "#2": "set"}}, "out": "", "note": "clear() empties the shared set. S1 is still a set \u2013 it prints as set(), not {}."}, {"line": 8, "before": {"names": {"S1": {"ref": "#1"}, "alias": {"ref": "#1"}, "dup": {"ref": "#2"}}, "heap": {"#1": [], "#2": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set", "#2": "set"}}, "after": {"names": {"S1": {"ref": "#1"}, "alias": {"ref": "#1"}, "dup": {"ref": "#2"}}, "heap": {"#1": [], "#2": [{"v": "10"}, {"v": "20"}, {"v": "30"}]}, "kinds": {"#1": "set", "#2": "set"}}, "out": "set()\n", "note": "alias is empty too, because it is the same object."}]}, {"id": "comp", "title": "Set comprehension, step by step", "section": "\u00a76 \u00b7 Lecture 133", "blurb": "A set comprehension is a loop that adds each result to a set \u2013 duplicates collapse automatically. {x**2 for x in [...]} builds exactly this set in one line.", "code": ["S = set()", "for x in [-2, -1, 0, 1, 2]:", "    S.add(x**2)", "print(S)"], "steps": [{"line": 0, "before": {"names": {}, "heap": {}, "kinds": {}}, "after": {"names": {"S": {"ref": "#1"}}, "heap": {"#1": []}, "kinds": {"#1": "set"}}, "out": "", "note": "Start with an empty set."}, {"line": 1, "before": {"names": {"S": {"ref": "#1"}}, "heap": {"#1": []}, "kinds": {"#1": "set"}}, "after": {"names": {"S": {"ref": "#1"}, "x": {"v": "-2"}}, "heap": {"#1": []}, "kinds": {"#1": "set"}}, "out": "", "note": "The loop takes the next value from the list and stores it in x."}, {"line": 2, "before": {"names": {"S": {"ref": "#1"}, "x": {"v": "-2"}}, "heap": {"#1": []}, "kinds": {"#1": "set"}}, "after": {"names": {"S": {"ref": "#1"}, "x": {"v": "-2"}}, "heap": {"#1": [{"v": "4"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "x**2 is added. If the square is already in the set (4 and 1 appear twice), nothing changes \u2013 no error, no duplicate."}, {"line": 1, "before": {"names": {"S": {"ref": "#1"}, "x": {"v": "-2"}}, "heap": {"#1": [{"v": "4"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S": {"ref": "#1"}, "x": {"v": "-1"}}, "heap": {"#1": [{"v": "4"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "The loop takes the next value from the list and stores it in x."}, {"line": 2, "before": {"names": {"S": {"ref": "#1"}, "x": {"v": "-1"}}, "heap": {"#1": [{"v": "4"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S": {"ref": "#1"}, "x": {"v": "-1"}}, "heap": {"#1": [{"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "x**2 is added. If the square is already in the set (4 and 1 appear twice), nothing changes \u2013 no error, no duplicate."}, {"line": 1, "before": {"names": {"S": {"ref": "#1"}, "x": {"v": "-1"}}, "heap": {"#1": [{"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S": {"ref": "#1"}, "x": {"v": "0"}}, "heap": {"#1": [{"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "The loop takes the next value from the list and stores it in x."}, {"line": 2, "before": {"names": {"S": {"ref": "#1"}, "x": {"v": "0"}}, "heap": {"#1": [{"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S": {"ref": "#1"}, "x": {"v": "0"}}, "heap": {"#1": [{"v": "0"}, {"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "x**2 is added. If the square is already in the set (4 and 1 appear twice), nothing changes \u2013 no error, no duplicate."}, {"line": 1, "before": {"names": {"S": {"ref": "#1"}, "x": {"v": "0"}}, "heap": {"#1": [{"v": "0"}, {"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S": {"ref": "#1"}, "x": {"v": "1"}}, "heap": {"#1": [{"v": "0"}, {"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "The loop takes the next value from the list and stores it in x."}, {"line": 2, "before": {"names": {"S": {"ref": "#1"}, "x": {"v": "1"}}, "heap": {"#1": [{"v": "0"}, {"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S": {"ref": "#1"}, "x": {"v": "1"}}, "heap": {"#1": [{"v": "0"}, {"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "x**2 is added. If the square is already in the set (4 and 1 appear twice), nothing changes \u2013 no error, no duplicate."}, {"line": 1, "before": {"names": {"S": {"ref": "#1"}, "x": {"v": "1"}}, "heap": {"#1": [{"v": "0"}, {"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S": {"ref": "#1"}, "x": {"v": "2"}}, "heap": {"#1": [{"v": "0"}, {"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "The loop takes the next value from the list and stores it in x."}, {"line": 2, "before": {"names": {"S": {"ref": "#1"}, "x": {"v": "2"}}, "heap": {"#1": [{"v": "0"}, {"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S": {"ref": "#1"}, "x": {"v": "2"}}, "heap": {"#1": [{"v": "0"}, {"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "x**2 is added. If the square is already in the set (4 and 1 appear twice), nothing changes \u2013 no error, no duplicate."}, {"line": 1, "before": {"names": {"S": {"ref": "#1"}, "x": {"v": "2"}}, "heap": {"#1": [{"v": "0"}, {"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S": {"ref": "#1"}, "x": {"v": "2"}}, "heap": {"#1": [{"v": "0"}, {"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "out": "", "note": "The loop takes the next value from the list and stores it in x."}, {"line": 3, "before": {"names": {"S": {"ref": "#1"}, "x": {"v": "2"}}, "heap": {"#1": [{"v": "0"}, {"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "after": {"names": {"S": {"ref": "#1"}, "x": {"v": "2"}}, "heap": {"#1": [{"v": "0"}, {"v": "1"}, {"v": "4"}]}, "kinds": {"#1": "set"}}, "out": "{0, 1, 4}\n", "note": "S is {0, 1, 4}. The one-line form {x**2 for x in [-2, -1, 0, 1, 2]} gives the same set."}]}];
+const OBJ_COLORS = ['--o1','--o2','--o3','--o4','--o5'];
+const $ = id => document.getElementById(id);
+let sc = DATA[0], p = 0, phase = 'ready', timer = null;
+
+function colorOf(label){ const n = parseInt(label.slice(1),10)-1; return `var(${OBJ_COLORS[n % OBJ_COLORS.length]})`; }
+function esc(s){ return String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+let KINDS = {};
+function kindOf(lab){ return KINDS[lab] || 'list'; }
+function show(v){ return v.ref ? `<span class="chip ref" style="color:${colorOf(v.ref)}">→ ${kindOf(v.ref)} ${v.ref}</span>` : `<span class="val">${esc(v.v)}</span>`; }
+function same(a,b){ return a && b && a.ref===b.ref && a.v===b.v; }
+function pyList(heap, lab, depth=0){
+  if(kindOf(lab)==='set'){ if(!heap[lab].length) return 'set()'; return '{' + heap[lab].map(x => x.ref ? pyList(heap, x.ref, depth+1) : x.v).join(', ') + '}'; }
+  const tup = kindOf(lab)==='tuple';
+  if(depth>3) return tup ? '(...)' : '[...]';
+  const parts = heap[lab].map(x => x.ref ? pyList(heap, x.ref, depth+1) : x.v);
+  return tup ? '(' + parts.join(', ') + (parts.length===1 ? ',' : '') + ')' : '[' + parts.join(', ') + ']';
+}
+
+function buildRail(){
+  $('rail').innerHTML = DATA.map(d => `<button role="tab" id="tab-${d.id}" aria-selected="${d===sc}" data-id="${d.id}">${esc(d.title)} <small>${esc(d.section)}</small></button>`).join('');
+  $('rail').querySelectorAll('button').forEach(b => b.onclick = () => select(b.dataset.id, true));
+}
+
+function select(id, push){
+  const d = DATA.find(x => x.id===id) || DATA[0];
+  stopAuto(); sc = d; p = 0; phase = 'ready';
+  if(push){ try{ history.replaceState(null,'','#'+d.id); }catch(e){} }
+  buildRail(); render();
+}
+
+function render(){
+  const st = sc.steps[p];
+  const state = phase==='ready' ? st.before : st.after;
+  const prev = st.before;
+  KINDS = Object.assign({}, prev.kinds||{}, state.kinds||{});
+  $('blurb').textContent = sc.blurb;
+  // code
+  $('code').innerHTML = sc.code.map((ln,i) => {
+    let cls = '', mk = '';
+    if(i===st.line){ cls = phase==='ready' ? 'ready' : (st.error ? 'bad' : 'ran'); mk = phase==='ready' ? '▶' : (st.error ? '✕' : '✓'); }
+    return `<li class="${cls}"><span class="n">${i+1}</span><span class="mk">${mk}</span><span>${esc(ln)||' '}</span></li>`;
+  }).join('');
+  // progress
+  const total = sc.steps.length;
+  const doneCount = p + (phase==='ran' ? 1 : 0);
+  $('bar').style.width = (100*doneCount/total)+'%';
+  $('prog').textContent = `step ${p+1} of ${total} · line ${st.line+1} ${phase==='ready' ? 'is next' : 'executed'}`;
+  const last = p===total-1 && phase==='ran';
+  $('go').textContent = phase==='ready' ? '▶ Run line' : (last ? '✓ Finished' : '⏭ Next line');
+  $('go').className = 'go' + (phase==='ran' ? ' next' : '');
+  $('go').disabled = last;
+  $('back').disabled = p===0 && phase==='ready';
+  // memory
+  const names = Object.entries(state.names);
+  let html = '';
+  if(!names.length){ html = '<div class="empty">Nothing in memory yet – run the first line.</div>'; }
+  else{
+    html += '<div class="names">' + names.map(([k,v]) => {
+      const changed = phase==='ran' && !same(v, prev.names[k]);
+      return `<span class="k">${esc(k)}</span><span>${show(v)}${changed ? ' <span class="badge">' + (prev.names[k] ? 'updated' : 'new') + '</span>' : ''}</span>`;
+    }).join('') + '</div>';
+    for(const [lab, items] of Object.entries(state.heap)){
+      const before = prev.heap[lab];
+      const isNew = phase==='ran' && !before;
+      const holders = names.filter(([k,v]) => v.ref===lab).map(([k]) => k);
+      const n = items.length;
+      const isSet = kindOf(lab)==='set';
+      const cells = items.map((x,i) => {
+        let c = '';
+        if(isSet){ if(phase==='ran' && before && !before.some(y => same(x,y))) c='new'; }
+        else if(phase==='ran' && before){ if(i>=before.length) c='new'; else if(!same(x,before[i])) c='chg'; }
+        if(isNew) c = 'new';
+        const inner = x.ref ? `<span class="ref" style="color:${colorOf(x.ref)}">→ ${x.ref}</span>` : esc(x.v);
+        return isSet ? `<div class="cell"><span class="ix">&nbsp;</span><span class="bx ${c}">${inner}</span><span class="ix">&nbsp;</span></div>`
+                     : `<div class="cell"><span class="ix">${i}</span><span class="bx ${c}">${inner}</span><span class="ix">${i-n}</span></div>`;
+      }).join('');
+      const changed = phase==='ran' && before && pyList(state.heap,lab)!==pyList(prev.heap,lab);
+      html += `<div class="obj"><div class="hd"><span class="tag" style="color:${colorOf(lab)}">${kindOf(lab)} ${lab}</span>`+
+        `<span>${holders.length ? 'named ' + holders.join(', ') : 'inside another object'}</span>`+
+        `<span>len ${n}</span>${isNew ? '<span class="badge">new ' + kindOf(lab) + '</span>' : ''}</div>`+
+        (n ? `<div class="cells">${cells}</div>` : (kindOf(lab)==='tuple' ? '<div class="empty">( ) empty tuple</div>' : (isSet ? '<div class="empty">set() – an empty set, no elements yet</div>' : '<div class="empty">[ ] empty list</div>'))) +
+        (changed ? `<div class="was">was <s>${esc(pyList(prev.heap,lab))}</s></div>` : '') + '</div>';
+    }
+  }
+  $('mem').innerHTML = html;
+  // explanation
+  let ex = '';
+  if(phase==='ready'){
+    ex = `<span class="state ready">Next: line ${st.line+1}</span><p><code>${esc(sc.code[st.line].trim())}</code> – what do you expect to happen? Press <b>Run line</b> to check.</p>`;
+  } else {
+    ex = `<span class="state ran">${st.error ? 'Raised an error' : 'Ran line ' + (st.line+1)}</span><p>${esc(st.note)}</p>`;
+    if(st.error) ex += `<div class="err">${esc(st.error)}</div>`;
+  }
+  $('explain').innerHTML = ex;
+  // console
+  let out = '';
+  for(let i=0;i<p;i++) out += esc(sc.steps[i].out);
+  let fresh = phase==='ran' ? sc.steps[p].out : '';
+  if(phase==='ran' && st.error) fresh += 'Traceback (most recent call last): ...\n' + st.error + '\n';
+  $('console').innerHTML = (out || fresh) ? out + (fresh ? `<span class="fresh">${esc(fresh)}</span>` : '') : '<span class="ph">print() output appears here</span>';
+}
+
+function forward(){
+  if(phase==='ready'){ phase='ran'; }
+  else if(p < sc.steps.length-1){ p++; phase='ready'; }
+  else { stopAuto(); }
+  render();
+}
+function backward(){
+  if(phase==='ran'){ phase='ready'; }
+  else if(p>0){ p--; phase='ran'; }
+  render();
+}
+function reset(){ stopAuto(); p=0; phase='ready'; render(); }
+function stopAuto(){ if(timer){ clearInterval(timer); timer=null; } $('auto').textContent='⏵ Auto'; $('auto').setAttribute('aria-pressed','false'); }
+function toggleAuto(){
+  if(timer){ stopAuto(); return; }
+  if(p===sc.steps.length-1 && phase==='ran') reset();
+  $('auto').textContent='⏸ Pause'; $('auto').setAttribute('aria-pressed','true');
+  forward();
+  timer = setInterval(() => { if(p===sc.steps.length-1 && phase==='ran') stopAuto(); else forward(); }, +$('speed').value);
+}
+$('go').onclick = () => { stopAuto(); forward(); };
+$('back').onclick = () => { stopAuto(); backward(); };
+$('reset').onclick = reset;
+$('auto').onclick = toggleAuto;
+$('speed').onchange = () => { if(timer){ stopAuto(); toggleAuto(); } };
+document.addEventListener('keydown', e => {
+  if(e.target.closest && e.target.closest('select')) return;
+  if(e.key===' ' || e.key==='ArrowRight'){ e.preventDefault(); stopAuto(); forward(); }
+  else if(e.key==='ArrowLeft'){ e.preventDefault(); stopAuto(); backward(); }
+  else if(e.key==='r' || e.key==='R'){ reset(); }
+});
+const start = (location.hash||'').slice(1);
+select(DATA.some(d => d.id===start) ? start : DATA[0].id, false);
+</script>
