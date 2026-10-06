@@ -1,0 +1,233 @@
+[
+ {
+  "id": "call_flow",
+  "title": "Flow of control in a call",
+  "section": "\u00a72",
+  "blurb": "Control jumps into the function, parameters get bound, the body runs, and the return value flows back.",
+  "code": [
+   "def volume(length, breadth, height):",
+   "    vol = length * breadth * height",
+   "    return vol",
+   "v = volume(10, 5, 3)",
+   "print(v)"
+  ],
+  "notes": {
+   "1": "def only creates the function and binds the name volume. The body does NOT run yet.",
+   "4": "The call: control jumps into volume and the formal parameters length, breadth, height are bound to the actual parameters 10, 5, 3.",
+   "2": "Inside the function: vol = 10 * 5 * 3 = 150, stored in the function's own local scope.",
+   "3": "return hands 150 back and control returns to line 4, where it is assigned to v.",
+   "5": "print shows the value that was returned."
+  }
+ },
+ {
+  "id": "passing",
+  "title": "Mutation vs rebinding",
+  "section": "\u00a72",
+  "blurb": "The parameter is a new name for the same object: rebinding an int is invisible to the caller, mutating a list is not.",
+  "code": [
+   "def modify(n, lst):",
+   "    n = n + 1",
+   "    lst.append(99)",
+   "x = 10",
+   "L = [1, 2]",
+   "modify(x, L)",
+   "print(x, L)"
+  ],
+  "notes": {
+   "1": "Defines modify.",
+   "4": "x refers to the int 10.",
+   "5": "L refers to a list object.",
+   "6": "Call: n and lst become extra names for the SAME objects as x and L - lst points to the same list as L.",
+   "2": "n + 1 creates a NEW int 11 and rebinds the local name n. The caller's x is untouched.",
+   "3": "append changes the one shared list object in place, so the caller's L sees it too.",
+   "7": "x is still 10, but L now contains 99."
+  }
+ },
+ {
+  "id": "binding",
+  "title": "Positional vs keyword binding",
+  "section": "\u00a73",
+  "blurb": "See how each call binds its values to length, breadth and height - and why a duplicate value fails.",
+  "code": [
+   "def volume(length, breadth, height):",
+   "    return length * breadth * height",
+   "a = volume(10, 5, 3)",
+   "b = volume(5, 10, 3)",
+   "c = volume(height=3, length=10, breadth=5)",
+   "d = volume(10, 5, height=3)",
+   "e = volume(5, length=3, height=2)"
+  ],
+  "notes": {
+   "1": "Defines volume with three parameters.",
+   "3": "Positional: values are matched by ORDER - length=10, breadth=5, height=3.",
+   "4": "Same function, different order: length=5, breadth=10. The product is the same but the assignment changed.",
+   "5": "Keyword: values are matched by NAME, so the order of the arguments does not matter.",
+   "6": "Mixed: positional first (length, breadth), then the keyword height=3.",
+   "7": "The first positional value 5 already fills length, and length=3 tries to fill it again - Python refuses.",
+   "2": "The body multiplies the three bound values and returns the product."
+  }
+ },
+ {
+  "id": "mutable_default",
+  "title": "Mutable default argument",
+  "section": "\u00a74",
+  "blurb": "The default list is created ONCE at def time and shared by every call that omits the argument.",
+  "code": [
+   "def add_item(item, my_list=[]):",
+   "    my_list.append(item)",
+   "    return my_list",
+   "defaults = add_item.__defaults__",
+   "r1 = add_item(1)",
+   "r2 = add_item(2)",
+   "r3 = add_item(3, [4])",
+   "r4 = add_item(5)",
+   "print(r1, r2, r3, r4)"
+  ],
+  "notes": {
+   "1": "The default [] is evaluated right now, once, and stored on the function object.",
+   "4": "__defaults__ is a tuple that holds the one shared default list.",
+   "5": "No list supplied, so my_list is bound to the shared default list.",
+   "2": "append changes the shared list in place.",
+   "3": "The same list object is returned - r1 now has a second name for it.",
+   "6": "Again no list supplied: the SAME shared list is reused, it is not fresh.",
+   "7": "The caller passed [4], so the default is not used. A separate list is appended to.",
+   "8": "No list supplied again: back to the shared list, which still remembers 1 and 2.",
+   "9": "r1, r2 and r4 are all the same shared list. r3 is the caller's own list."
+  }
+ },
+ {
+  "id": "none_sentinel",
+  "title": "The None-sentinel fix",
+  "section": "\u00a74",
+  "blurb": "Use None as the default and create the list INSIDE the function so every call starts fresh.",
+  "code": [
+   "def add_item(item, my_list=None):",
+   "    if my_list is None:",
+   "        my_list = []",
+   "    my_list.append(item)",
+   "    return my_list",
+   "r1 = add_item(1)",
+   "r2 = add_item(2)",
+   "r3 = add_item(3, [4])",
+   "r4 = add_item(5)",
+   "print(r1, r2, r3, r4)"
+  ],
+  "notes": {
+   "1": "The default is the immutable None, so nothing mutable is shared.",
+   "6": "No list supplied: my_list is None.",
+   "2": "my_list is None, so the if-branch runs.",
+   "3": "A brand-new empty list is created for THIS call only.",
+   "4": "append fills the fresh list.",
+   "5": "Returns the fresh list.",
+   "7": "Second call, again None: another brand-new list is created, so it does not remember the first call.",
+   "8": "The caller passed [4], so my_list is not None and the if-branch is skipped.",
+   "9": "Again a fresh list.",
+   "10": "Four independent lists: [1] [2] [4, 3] [5]."
+  }
+ },
+ {
+  "id": "markers_pos",
+  "title": "Positional-only (/) in action",
+  "section": "\u00a75, \u00a77",
+  "blurb": "Parameters before / cannot be passed by keyword.",
+  "code": [
+   "def fun(a, /, b, *, c):",
+   "    return a + b + c",
+   "r1 = fun(5, b=10, c=15)",
+   "r2 = fun(5, 10, c=15)",
+   "r3 = fun(a=5, b=10, c=15)"
+  ],
+  "notes": {
+   "1": "a is positional-only (before /), b is positional-or-keyword, c is keyword-only (after *).",
+   "3": "a=5 by position, b=10 by keyword, c=15 by keyword - allowed.",
+   "4": "b may also be given by position - allowed.",
+   "5": "a is positional-only, so it cannot be passed as a=5."
+  }
+ },
+ {
+  "id": "markers_kw",
+  "title": "Keyword-only (*) in action",
+  "section": "\u00a76, \u00a77",
+  "blurb": "Parameters after * cannot be passed by position.",
+  "code": [
+   "def fun(a, /, b, *, c):",
+   "    return a + b + c",
+   "r1 = fun(5, 10, c=15)",
+   "r2 = fun(5, 10, 15)"
+  ],
+  "notes": {
+   "1": "Same signature as before.",
+   "3": "a and b by position, c by keyword - allowed.",
+   "4": "Only two parameters (a, b) accept positional values, so a third positional value is rejected."
+  }
+ },
+ {
+  "id": "pangram",
+  "title": "Pangram: collecting letters",
+  "section": "\u00a78.3",
+  "blurb": "Walk the phrase once; keep only letters, lower-cased, in a set so duplicates vanish.",
+  "code": [
+   "unique_chars = set()",
+   "for char in \"Pa1 p\":",
+   "    if char.isalpha():",
+   "        unique_chars.add(char.lower())",
+   "print(len(unique_chars))"
+  ],
+  "notes": {
+   "1": "An empty set - it will collect each letter once.",
+   "2": "Take the next character from the phrase.",
+   "3": "isalpha() is True only for letters. Digits, spaces and symbols are skipped.",
+   "4": "lower() makes P and p the same letter; add() ignores a letter that is already in the set.",
+   "5": "The number of distinct letters seen."
+  }
+ },
+ {
+  "id": "max3",
+  "title": "Maximum of three (branching)",
+  "section": "\u00a78.1",
+  "blurb": "Follow the nested if/else until a return runs.",
+  "code": [
+   "def func_max_finder(a, b, c, /):",
+   "    if a > b:",
+   "        if a > c:",
+   "            return a",
+   "        else:",
+   "            return c",
+   "    else:",
+   "        if b > c:",
+   "            return b",
+   "        else:",
+   "            return c",
+   "max = func_max_finder(5, 20, 15)",
+   "print(max)"
+  ],
+  "notes": {
+   "1": "Defines the function (a, b, c are positional-only).",
+   "12": "a=5, b=20, c=15 are bound by position.",
+   "2": "5 > 20 is False, so the outer else-branch runs.",
+   "8": "20 > 15 is True.",
+   "9": "return b sends 20 back.",
+   "13": "max now names the int 20 (and hides the built-in max())."
+  }
+ },
+ {
+  "id": "simple_interest",
+  "title": "Simple interest (keyword-only)",
+  "section": "\u00a78.2",
+  "blurb": "A leading * forces every argument to be named.",
+  "code": [
+   "def func_simple_interest(*, P, R, T):",
+   "    return (P * R * T) / 100",
+   "SI = func_simple_interest(P=1000, R=5, T=2)",
+   "print(SI)",
+   "func_simple_interest(1000, 5, 2)"
+  ],
+  "notes": {
+   "1": "The bare * means P, R, T are all keyword-only.",
+   "3": "Keywords bind P=1000, R=5, T=2.",
+   "2": "(1000 * 5 * 2) / 100 = 100.0 - true division gives a float.",
+   "4": "Prints the interest.",
+   "5": "Positional values are not allowed at all, so Python rejects the call."
+  }
+ }
+]
