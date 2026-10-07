@@ -2,7 +2,7 @@
  {
   "id": "call_flow",
   "title": "Flow of control in a call",
-  "section": "\u00a72",
+  "section": "§2",
   "blurb": "Control jumps into the function, parameters get bound, the body runs, and the return value flows back.",
   "code": [
    "def volume(length, breadth, height):",
@@ -22,7 +22,7 @@
  {
   "id": "passing",
   "title": "Mutation vs rebinding",
-  "section": "\u00a72",
+  "section": "§2",
   "blurb": "The parameter is a new name for the same object: rebinding an int is invisible to the caller, mutating a list is not.",
   "code": [
    "def modify(n, lst):",
@@ -46,7 +46,7 @@
  {
   "id": "binding",
   "title": "Positional vs keyword binding",
-  "section": "\u00a73",
+  "section": "§3",
   "blurb": "See how each call binds its values to length, breadth and height - and why a duplicate value fails.",
   "code": [
    "def volume(length, breadth, height):",
@@ -70,7 +70,7 @@
  {
   "id": "mutable_default",
   "title": "Mutable default argument",
-  "section": "\u00a74",
+  "section": "§4",
   "blurb": "The default list is created ONCE at def time and shared by every call that omits the argument.",
   "code": [
    "def add_item(item, my_list=[]):",
@@ -98,7 +98,7 @@
  {
   "id": "none_sentinel",
   "title": "The None-sentinel fix",
-  "section": "\u00a74",
+  "section": "§4",
   "blurb": "Use None as the default and create the list INSIDE the function so every call starts fresh.",
   "code": [
    "def add_item(item, my_list=None):",
@@ -128,7 +128,7 @@
  {
   "id": "markers_pos",
   "title": "Positional-only (/) in action",
-  "section": "\u00a75, \u00a77",
+  "section": "§5, §7",
   "blurb": "Parameters before / cannot be passed by keyword.",
   "code": [
    "def fun(a, /, b, *, c):",
@@ -147,7 +147,7 @@
  {
   "id": "markers_kw",
   "title": "Keyword-only (*) in action",
-  "section": "\u00a76, \u00a77",
+  "section": "§6, §7",
   "blurb": "Parameters after * cannot be passed by position.",
   "code": [
    "def fun(a, /, b, *, c):",
@@ -164,7 +164,7 @@
  {
   "id": "pangram",
   "title": "Pangram: collecting letters",
-  "section": "\u00a78.3",
+  "section": "§8.3",
   "blurb": "Walk the phrase once; keep only letters, lower-cased, in a set so duplicates vanish.",
   "code": [
    "unique_chars = set()",
@@ -184,7 +184,7 @@
  {
   "id": "max3",
   "title": "Maximum of three (branching)",
-  "section": "\u00a78.1",
+  "section": "§8.1",
   "blurb": "Follow the nested if/else until a return runs.",
   "code": [
    "def func_max_finder(a, b, c, /):",
@@ -213,7 +213,7 @@
  {
   "id": "simple_interest",
   "title": "Simple interest (keyword-only)",
-  "section": "\u00a78.2",
+  "section": "§8.2",
   "blurb": "A leading * forces every argument to be named.",
   "code": [
    "def func_simple_interest(*, P, R, T):",
@@ -228,6 +228,462 @@
    "2": "(1000 * 5 * 2) / 100 = 100.0 - true division gives a float.",
    "4": "Prints the interest.",
    "5": "Positional values are not allowed at all, so Python rejects the call."
+  }
+ },
+ {
+  "id": "func_object",
+  "title": "A function is an object",
+  "section": "§7D",
+  "blurb": "Functions have attributes (__name__), a type, and can be given a second name without being called.",
+  "code": [
+   "def add(x, y):",
+   "    return x + y",
+   "print(print.__name__)",
+   "print(add.__name__)",
+   "print(type(add))",
+   "f = add",
+   "print(f is add)",
+   "result = f(2, 3)",
+   "print(result)"
+  ],
+  "notes": {
+   "1": "def creates a function OBJECT and binds the name add to it. The body does not run yet.",
+   "3": "print is a function too, so it has attributes. print.__name__ is the string 'print'.",
+   "4": "add.__name__ is 'add': every function object carries its own name.",
+   "5": "type(add) is <class 'function'>. A function is an ordinary object whose class is function.",
+   "6": "f = add has NO brackets, so add is not called. The same function object just gets a second name, f.",
+   "7": "f is add is True: both names refer to one function object (no copy was made).",
+   "8": "f(2, 3) calls the function object through its second name. Control jumps into add.",
+   "2": "The body runs: 2 + 3 = 5 is returned to the caller.",
+   "9": "print shows the value that was returned."
+  }
+ },
+ {
+  "id": "func_param",
+  "title": "Function as a parameter",
+  "section": "§7E",
+  "blurb": "airthmatic receives a function in its parameter f and calls it. Pass sub and f(x, y) means sub(x, y).",
+  "code": [
+   "def add(x, y):",
+   "    return x + y",
+   "def sub(x, y):",
+   "    return x - y",
+   "def airthmatic(f, x, y):",
+   "    return f(x, y)",
+   "sum = airthmatic(sub, 5, 6)",
+   "print(sum)"
+  ],
+  "notes": {
+   "1": "Defines add. It is not passed anywhere in this run.",
+   "3": "Defines sub.",
+   "5": "Defines airthmatic. Its first parameter f is going to receive a function.",
+   "7": "The call airthmatic(sub, 5, 6): f is bound to the function object sub (no brackets after sub, so it is NOT called), x=5, y=6.",
+   "6": "f(x, y) calls whatever f refers to. Here f is sub, so control jumps into sub(5, 6).",
+   "4": "sub computes 5 - 6 = -1 and returns it. airthmatic passes the same value on to its caller.",
+   "8": "sum holds -1. (Naming a variable sum hides Python's built-in sum().)"
+  }
+ },
+ {
+  "id": "func_return1",
+  "title": "Function as a return value",
+  "section": "§7F",
+  "blurb": "A function can hand back another function. The returned function is then called like any other.",
+  "code": [
+   "def fun_airthmatic(funName):",
+   "    return funName",
+   "def add(a, b):",
+   "    return a + b",
+   "g = fun_airthmatic(add)",
+   "r = g(5, 6)",
+   "print(r)"
+  ],
+  "notes": {
+   "1": "Defines fun_airthmatic: it returns the function it receives.",
+   "3": "Defines add.",
+   "5": "The call fun_airthmatic(add): funName is bound to the function object add. add is not called (no brackets).",
+   "2": "return funName hands the function object back to the caller. Still nothing has called add.",
+   "6": "g(5, 6): g is the returned function, i.e. add itself, so this calls add with a=5, b=6.",
+   "4": "add returns 5 + 6 = 11.",
+   "7": "print shows 11."
+  }
+ },
+ {
+  "id": "func_return2",
+  "title": "Returning an inner function",
+  "section": "§7F",
+  "blurb": "fun_outer builds fun_inner and returns it WITHOUT calling it. Nothing inside fun_inner runs until fun() is called.",
+  "code": [
+   "def fun_outer():",
+   "    print(\"Outer\")",
+   "    def fun_inner():",
+   "        print(\"inner\")",
+   "    return fun_inner",
+   "fun = fun_outer()",
+   "print(\"calling inner\")",
+   "fun()"
+  ],
+  "notes": {
+   "1": "Defines fun_outer. Nothing inside it runs yet.",
+   "6": "Calls fun_outer(). Control jumps into its body.",
+   "2": "print('Outer') runs because fun_outer is running.",
+   "3": "def fun_inner creates the inner function object. Its body (print 'inner') is NOT run.",
+   "5": "return fun_inner (no brackets) hands the function object back without calling it. fun_outer's frame is then gone.",
+   "7": "Prints 'calling inner'. fun_inner has still not run.",
+   "8": "fun() calls the returned function. Control jumps into fun_inner.",
+   "4": "Only now does print('inner') run."
+  }
+ },
+ {
+  "id": "inner_func",
+  "title": "Inner function (totalArea)",
+  "section": "§7G",
+  "blurb": "area exists only while totalArea runs. The three calls were put on separate lines so each one can be seen.",
+  "code": [
+   "def totalArea(l, b, h):",
+   "    def area(l, b):",
+   "        a = l * b",
+   "        return a",
+   "    a1 = area(l, b)",
+   "    a2 = area(b, h)",
+   "    a3 = area(l, h)",
+   "    return 2 * (a1 + a2 + a3)",
+   "total = totalArea(5, 10, 2)",
+   "print(total)",
+   "area(2, 3)"
+  ],
+  "notes": {
+   "1": "Defines totalArea.",
+   "9": "Call totalArea(5, 10, 2): l=5, b=10, h=2.",
+   "2": "Running this def creates area INSIDE this call of totalArea. The name area exists only in this frame.",
+   "5": "area(l, b) calls the inner function with 5 and 10. A new frame is stacked on top of totalArea.",
+   "6": "Second call, area(b, h) = area(10, 2). a1 = 50 is already stored in totalArea.",
+   "7": "Third call, area(l, h) = area(5, 2).",
+   "3": "a = l * b: the product of this call's two arguments, stored in area's own local a.",
+   "4": "return a sends the product back to totalArea. The area frame disappears.",
+   "8": "2 * (50 + 20 + 10) = 160 is returned from totalArea.",
+   "10": "print shows 160.",
+   "11": "area was created inside totalArea and is local to it. At the top level the name area does not exist."
+  }
+ },
+ {
+  "id": "closure_msg",
+  "title": "Closure remembers msg and name",
+  "section": "§7H",
+  "blurb": "fun_inner is returned after fun_outer has finished, yet it still knows msg and name. The global msg is never used.",
+  "code": [
+   "msg = \"hello\"",
+   "def fun_outer(name):",
+   "    msg = \"Welcome\"",
+   "    def fun_inner():",
+   "        print(\"*\" * 10)",
+   "        print(f\"{msg} {name}\")",
+   "        print(\"*\" * 10)",
+   "    return fun_inner",
+   "f = fun_outer(\"Chinku\")",
+   "f()"
+  ],
+  "notes": {
+   "1": "A global msg = 'hello'. The closure below will NOT use it.",
+   "2": "Defines fun_outer.",
+   "9": "Call fun_outer('Chinku'): the parameter name is bound to 'Chinku'.",
+   "3": "msg = 'Welcome' creates a LOCAL msg inside fun_outer. It shadows the global msg.",
+   "4": "def fun_inner creates the inner function. It uses msg and name, so Python keeps both alive in cells attached to the function (see the “carries” line).",
+   "8": "fun_inner is returned and fun_outer finishes. The returned function still carries msg='Welcome' and name='Chinku'. That is a closure.",
+   "10": "f() calls the returned function. fun_outer is long gone, yet its variables are still available.",
+   "5": "Prints a line of 10 stars.",
+   "6": "The f-string uses msg='Welcome' and name='Chinku' from the closure (not the global msg 'hello').",
+   "7": "Prints the closing line of stars."
+  }
+ },
+ {
+  "id": "closure_counter",
+  "title": "Closure counter with nonlocal",
+  "section": "§7H",
+  "blurb": "Each call of fun_get_counter creates its own count. nonlocal lets the inner function change it. (One call per line.)",
+  "code": [
+   "def fun_get_counter():",
+   "    count = 0",
+   "    def fun_increment_counter():",
+   "        nonlocal count",
+   "        count += 1",
+   "        return count",
+   "    return fun_increment_counter",
+   "c1 = fun_get_counter()",
+   "c2 = fun_get_counter()",
+   "a = c1()",
+   "b = c1()",
+   "c = c1()",
+   "x = c2()",
+   "print(a, b, c, x)"
+  ],
+  "notes": {
+   "1": "Defines fun_get_counter.",
+   "8": "First call: creates a private counter for c1.",
+   "2#1": "count = 0 is this call's own variable.",
+   "3#1": "Creates the inner function. It changes count, so count is kept in a cell attached to the function. (nonlocal is only a declaration, so it is not a step of its own.)",
+   "7#1": "Returns the inner function. count (0) travels with it.",
+   "9": "Second call: creates a completely separate counter for c2.",
+   "2#2": "A brand-new count = 0, a different variable from c1's.",
+   "3#2": "A second, separate inner function object.",
+   "7#2": "Returns it. c2 now has its own count.",
+   "10": "c1() runs the inner function. nonlocal count means: use fun_get_counter's count, do not create a new local one.",
+   "11": "c1() again.",
+   "12": "c1() a third time.",
+   "13": "c2() runs c2's inner function.",
+   "5#1": "count += 1 updates the count stored in the closure: 0 becomes 1.",
+   "5#2": "The closure remembered 1, so it becomes 2.",
+   "5#3": "The closure remembered 2, so it becomes 3.",
+   "5#4": "c2 has its own count (0), so it becomes 1. c1 and c2 do not share.",
+   "6": "return count sends the new value back to the caller.",
+   "14": "Prints 1 2 3 1."
+  }
+ },
+ {
+  "id": "closure_no_nonlocal",
+  "title": "Counter without nonlocal",
+  "section": "§7H",
+  "blurb": "Extra: the same counter without nonlocal. count += 1 makes count a local name, so reading it first fails.",
+  "code": [
+   "def fun_get_counter():",
+   "    count = 0",
+   "    def fun_increment_counter():",
+   "        count += 1",
+   "        return count",
+   "    return fun_increment_counter",
+   "c1 = fun_get_counter()",
+   "c1()"
+  ],
+  "notes": {
+   "1": "Defines fun_get_counter.",
+   "7": "Call fun_get_counter().",
+   "2": "count = 0 inside fun_get_counter.",
+   "3": "Creates the inner function. It has no nonlocal declaration this time.",
+   "6": "Returns the inner function.",
+   "8": "c1() runs the inner function.",
+   "4": "count is ASSIGNED in this function (count += 1), so Python treats count as a LOCAL variable of fun_increment_counter. That local has no value yet, so reading it fails. Adding nonlocal count makes it refer to the outer count."
+  }
+ },
+ {
+  "id": "lambda_basic",
+  "title": "Lambda vs def",
+  "section": "§7I",
+  "blurb": "A lambda is an unnamed one-expression function. double and k do the same job; a lambda can also be called on the spot.",
+  "code": [
+   "def double(x):",
+   "    return x * 2",
+   "k = lambda x: x * 2",
+   "a = double(3)",
+   "b = k(3)",
+   "c = (lambda x, y: x + y)(5, 6)",
+   "print(a, b, c)"
+  ],
+  "notes": {
+   "1": "Defines double with def.",
+   "3": "A lambda creates an anonymous function object. k is just a name for it, doing the same job as double.",
+   "4": "double(3): control jumps into the def function.",
+   "2": "Returns 3 * 2 = 6.",
+   "5": "k(3) calls the lambda. Its body x * 2 is the value it returns (a lambda has no return keyword), so b = 6.",
+   "6": "(lambda x, y: x + y)(5, 6) creates the lambda and calls it at once: c = 11.",
+   "7": "print shows 6 6 11."
+  }
+ },
+ {
+  "id": "lambda_map_filter",
+  "title": "Lambda with filter and map",
+  "section": "§7I",
+  "blurb": "filter keeps the items for which the lambda is True. map replaces each item by the lambda's result.",
+  "code": [
+   "nums = [1, 2, 3, 4, 5, 6]",
+   "evens = list(filter(lambda x: x % 2 == 0, nums))",
+   "neg = list(map(lambda x: -x, nums))",
+   "mixed = list(map(lambda x: x if x % 2 == 0 else -x, nums))",
+   "print(evens)",
+   "print(neg)",
+   "print(mixed)"
+  ],
+  "notes": {
+   "1": "A list of six numbers.",
+   "2": "filter calls the lambda on each item and keeps the items for which it returns True: 2, 4, 6. list() collects them into a new list.",
+   "3": "map calls the lambda on each item and collects the results: every number negated.",
+   "4": "The lambda holds a conditional expression: even numbers stay, odd numbers become negative.",
+   "5": "Prints the filtered list.",
+   "6": "Prints the negated list.",
+   "7": "Prints the mixed list."
+  }
+ },
+ {
+  "id": "lambda_sorted",
+  "title": "Lambda as a sort key",
+  "section": "§7I",
+  "blurb": "sorted(..., key=lambda) sorts by the value the lambda returns for each item instead of by the item itself.",
+  "code": [
+   "data = [[4, 1, 'Five'], [2, 2, 'Four'], [3, 3, 'Six']]",
+   "by_default = sorted(data)",
+   "by_sum = sorted(data, key=lambda x: x[0] + x[1])",
+   "by_word = sorted(data, key=lambda x: x[2])",
+   "print(by_default)",
+   "print(by_sum)",
+   "print(by_word)"
+  ],
+  "notes": {
+   "1": "Three inner lists of the form [number, number, word].",
+   "2": "No key: lists are compared item by item, so the first number decides the order: 2, 3, 4.",
+   "3": "key=lambda x: x[0] + x[1] gives 5, 4 and 6 for the three lists, and sorted orders by those keys: 4, 5, 6.",
+   "4": "key=lambda x: x[2] sorts by the word: 'Five' < 'Four' < 'Six'.",
+   "5": "Prints the default order.",
+   "6": "Prints the order by number sum.",
+   "7": "Prints the order by word."
+  }
+ },
+ {
+  "id": "callable_obj",
+  "title": "Callable class (__call__)",
+  "section": "§7J",
+  "blurb": "Day() creates an object; d(2) then runs its __call__ method. The weekday dictionary is shortened to three days.",
+  "code": [
+   "class Day:",
+   "    def __init__(self):",
+   "        self.days = {0: 'Sunday', 1: 'Monday', 2: 'tuesday'}",
+   "    def __call__(self, dayNo):",
+   "        return self.days[dayNo][0:3].capitalize()",
+   "d = Day()",
+   "r = d(2)",
+   "print(r)",
+   "d(7)"
+  ],
+  "notes": {
+   "1#1": "The class statement starts. Python will run the class body to build the class.",
+   "1#2": "First thing inside the class body: the class namespace gets its name and module.",
+   "2": "def __init__ creates a function stored in the class namespace. It does not run yet.",
+   "4": "def __call__ adds a second method. Defining __call__ is what makes instances callable.",
+   "6": "Day() creates a new object and Python runs __init__ on it. Control jumps into __init__.",
+   "3": "__init__ stores the weekday dictionary on the object as self.days.",
+   "7": "d(2) looks like a function call. Because the class defines __call__, Python runs d.__call__(2): self is d and dayNo is 2.",
+   "5#1": "self.days[2] is 'tuesday', [0:3] gives 'tue' and capitalize() gives 'Tue'. This is returned.",
+   "8": "print shows Tue.",
+   "9": "d(7) runs __call__ again, this time with dayNo = 7.",
+   "5#2": "The dictionary has no key 7."
+  }
+ },
+ {
+  "id": "decorator_manual",
+  "title": "Decorator applied by hand",
+  "section": "§7K",
+  "blurb": "fun_outer receives fun_display, wraps it in fun_inner and returns the wrapper. f is the wrapper, not fun_display.",
+  "code": [
+   "def fun_outer(fun_display_fun):",
+   "    def fun_inner():",
+   "        print(\"*\" * 10)",
+   "        fun_display_fun()",
+   "        print(\"*\" * 10)",
+   "    return fun_inner",
+   "def fun_display():",
+   "    print(\"Hello\")",
+   "f = fun_outer(fun_display)",
+   "f()"
+  ],
+  "notes": {
+   "1": "Defines the decorator fun_outer. Its parameter is a function.",
+   "7": "Defines the plain function fun_display.",
+   "9": "Call fun_outer(fun_display): fun_display_fun is bound to the ORIGINAL function.",
+   "2": "Creates the wrapper fun_inner. It uses fun_display_fun, so that variable is kept in its closure.",
+   "6": "Returns the wrapper. f is now the wrapper, and the original fun_display lives inside it.",
+   "10": "f() runs the wrapper.",
+   "3": "The wrapper prints the first line of stars (extra behaviour BEFORE).",
+   "4": "The wrapper calls the original function it kept in its closure.",
+   "8": "The original fun_display prints Hello.",
+   "5": "The wrapper prints the closing stars (extra behaviour AFTER)."
+  }
+ },
+ {
+  "id": "decorator_rebind",
+  "title": "Decorating by rebinding the name",
+  "section": "§7K",
+  "blurb": "fun_display2 = fun_outer(fun_display2) replaces the name with the wrapper. The wrapper still holds the ORIGINAL function.",
+  "code": [
+   "def fun_outer(fun_display_fun):",
+   "    def fun_inner():",
+   "        print(\"*\" * 10)",
+   "        fun_display_fun()",
+   "        print(\"*\" * 10)",
+   "    return fun_inner",
+   "def fun_display2():",
+   "    print(\"Hello2\")",
+   "fun_display2()",
+   "fun_display2 = fun_outer(fun_display2)",
+   "fun_display2()"
+  ],
+  "notes": {
+   "1": "Defines the decorator fun_outer.",
+   "7": "Defines the plain function fun_display2.",
+   "9": "Called as declared: fun_display2() just prints Hello2.",
+   "8#1": "Prints Hello2, with no stars.",
+   "10": "fun_outer(fun_display2) is called with the original function. The result will REPLACE the name fun_display2.",
+   "2": "Creates the wrapper fun_inner, which keeps the original in its closure.",
+   "6": "Returns the wrapper. The name fun_display2 now points to the wrapper. The original function is still alive inside the wrapper.",
+   "11": "fun_display2() now runs the wrapper.",
+   "3": "Wrapper: first line of stars.",
+   "4": "The wrapper calls the original function through its closure. This is not recursion: the wrapper holds the old function.",
+   "8#2": "The ORIGINAL fun_display2 prints Hello2.",
+   "5": "Wrapper: closing stars."
+  }
+ },
+ {
+  "id": "decorator_at",
+  "title": "Decorator with @",
+  "section": "§7K",
+  "blurb": "@fun_outer above a def is shorthand for fun_display3 = fun_outer(fun_display3), done as soon as the def runs.",
+  "code": [
+   "def fun_outer(fun_display_fun):",
+   "    def fun_inner():",
+   "        print(\"*\" * 10)",
+   "        fun_display_fun()",
+   "        print(\"*\" * 10)",
+   "    return fun_inner",
+   "@fun_outer",
+   "def fun_display3():",
+   "    print(\"Hello3\")",
+   "fun_display3()"
+  ],
+  "notes": {
+   "1": "Defines the decorator fun_outer.",
+   "7#1": "@fun_outer: Python first looks up the decorator.",
+   "8#1": "Then the def below it creates the plain function fun_display3.",
+   "7#2": "Now Python calls fun_outer(fun_display3), passing the plain function.",
+   "2": "Creates the wrapper fun_inner, which keeps the original in its closure.",
+   "6": "Returns the wrapper.",
+   "8#2": "The returned wrapper is bound to the name fun_display3. This is exactly fun_display3 = fun_outer(fun_display3), done automatically.",
+   "10": "fun_display3() runs the wrapper.",
+   "3": "Wrapper: first line of stars.",
+   "4": "The wrapper calls the original function.",
+   "9": "The original fun_display3 prints Hello3.",
+   "5": "Wrapper: closing stars."
+  }
+ },
+ {
+  "id": "decorator_args",
+  "title": "Decorating a function with a parameter",
+  "section": "§7K",
+  "blurb": "Extra: fun_inner takes no parameters, so it cannot stand in for a function that does. (7A/7B: *args and **kwargs fix this.)",
+  "code": [
+   "def fun_outer(fun_display_fun):",
+   "    def fun_inner():",
+   "        fun_display_fun()",
+   "    return fun_inner",
+   "@fun_outer",
+   "def greet(name):",
+   "    print(\"Hello\", name)",
+   "greet(\"Subarna\")"
+  ],
+  "notes": {
+   "1": "Defines the decorator fun_outer.",
+   "5#1": "@fun_outer: Python looks up the decorator.",
+   "6#1": "The def creates the plain function greet, which takes one parameter.",
+   "5#2": "Python calls fun_outer(greet).",
+   "2": "Creates the wrapper fun_inner. Its parentheses are empty: it accepts no arguments.",
+   "4": "Returns the wrapper.",
+   "6#2": "The wrapper is bound to the name greet.",
+   "8": "greet now refers to fun_inner, which accepts NO arguments, but one was passed. Fix: def fun_inner(*args, **kwargs) and pass them on (see 7A and 7B)."
   }
  }
 ]
