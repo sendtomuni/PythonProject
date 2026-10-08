@@ -1,0 +1,732 @@
+[
+ {
+  "id": "no_try_crash",
+  "title": "Without try-except: the program crashes",
+  "section": "§1",
+  "blurb": "Entering 0 for B raises ZeroDivisionError on the division line. Nothing after it runs - not even the last print.",
+  "code": [
+   "a = int(input('Enter value of A '))",
+   "b = int(input('Enter value of B '))",
+   "c = a // b",
+   "print(f'a // b is {c}')",
+   "print('end')"
+  ],
+  "inputs": [
+   "10",
+   "0"
+  ],
+  "notes": {
+   "1": "int() turns the text into a number, so a = 10.",
+   "2": "b = 0. Zero is a perfectly valid int, so this line is fine.",
+   "3": "10 // 0 is undefined, so Python raises ZeroDivisionError. There is no try-except, so nothing handles it and the program crashes here. Lines 4 and 5 never run."
+  }
+ },
+ {
+  "id": "try_error",
+  "title": "try-except: an error jumps to except",
+  "section": "§2",
+  "blurb": "Line 4 raises, so lines after it inside the try block are skipped; execution continues in the except block and then after the whole construct.",
+  "code": [
+   "a = int(input('Enter value of A '))",
+   "b = int(input('Enter value of B '))",
+   "try:",
+   "    c = a // b",
+   "    print(f'a // b is {c}')",
+   "except:",
+   "    print('a // b is not possible as b is 0')",
+   "print('end')"
+  ],
+  "inputs": [
+   "10",
+   "0"
+  ],
+  "notes": {
+   "1": "int() turns the text into a number, so a = 10.",
+   "2": "b = 0. Zero is a perfectly valid int, so this line is fine.",
+   "3": "Entering the try block: Python now watches the lines inside it for exceptions. Nothing visible happens yet.",
+   "4": "10 // 0 raises ZeroDivisionError. The rest of the try block (line 5) is skipped and Python looks for a matching except.",
+   "6": "A bare except matches every exception, so control jumps here.",
+   "7": "The except body runs: the program handles the problem and prints a friendly message instead of crashing.",
+   "8": "Execution continues after the whole try-except. The program ends normally - graceful termination."
+  }
+ },
+ {
+  "id": "try_ok",
+  "title": "try-except: no error means except is skipped",
+  "section": "§2",
+  "blurb": "Same program, valid input. The try block runs to the end, the except block is skipped entirely.",
+  "code": [
+   "a = int(input('Enter value of A '))",
+   "b = int(input('Enter value of B '))",
+   "try:",
+   "    c = a // b",
+   "    print(f'a // b is {c}')",
+   "except:",
+   "    print('a // b is not possible as b is 0')",
+   "print('end')"
+  ],
+  "inputs": [
+   "10",
+   "5"
+  ],
+  "notes": {
+   "1": "int() turns the text into a number, so a = 10.",
+   "2": "b = 5.",
+   "3": "Entering the try block.",
+   "4": "10 // 5 = 2, no exception. c is now 2.",
+   "5": "Prints the result. This is the last line of the try block.",
+   "8": "No exception happened, so the except block (lines 6-7) was skipped entirely. Execution continues after the construct."
+  }
+ },
+ {
+  "id": "multi_except",
+  "title": "Several except blocks: first match wins",
+  "section": "§3",
+  "blurb": "int('abc') raises ValueError. Python checks the except clauses top to bottom and runs the first one whose class matches.",
+  "code": [
+   "L = [10, 20, 30, 40, 50]",
+   "",
+   "try:",
+   "    index = int(input('Enter Index to get value '))",
+   "    print(f'in array L at {index} value is {L[index]}')",
+   "except IndexError as msg:",
+   "    print(msg)",
+   "except TypeError as msg:",
+   "    print(msg)",
+   "except ValueError as msg:",
+   "    print(msg)",
+   "print('End of Program')"
+  ],
+  "inputs": [
+   "abc"
+  ],
+  "notes": {
+   "1": "The list L is created.",
+   "3": "Entering the try block.",
+   "4": "int('abc') cannot convert the text, so Python raises ValueError. Line 5 is skipped.",
+   "6": "Is a ValueError an IndexError? No - skip this clause.",
+   "8": "Is a ValueError a TypeError? No - skip this clause.",
+   "10": "Is it a ValueError? Yes - this clause matches and msg now refers to the exception object.",
+   "11": "Prints the message stored in the exception.",
+   "12": "The program carries on after the try statement."
+  }
+ },
+ {
+  "id": "multi_index",
+  "title": "Several except blocks: IndexError matches first",
+  "section": "§3",
+  "blurb": "Index 10 is valid for int() but out of range for the list, so the very first clause matches and the others are never checked.",
+  "code": [
+   "L = [10, 20, 30, 40, 50]",
+   "",
+   "try:",
+   "    index = int(input('Enter Index to get value '))",
+   "    print(f'in array L at {index} value is {L[index]}')",
+   "except IndexError as msg:",
+   "    print(msg)",
+   "except TypeError as msg:",
+   "    print(msg)",
+   "except ValueError as msg:",
+   "    print(msg)",
+   "print('End of Program')"
+  ],
+  "inputs": [
+   "10"
+  ],
+  "notes": {
+   "1": "The list L is created.",
+   "3": "Entering the try block.",
+   "4": "int('10') works: index = 10.",
+   "5": "L[10] does not exist (valid indexes are 0 to 4), so Python raises IndexError while evaluating the f-string.",
+   "6": "Is it an IndexError? Yes - the first clause matches, so the TypeError and ValueError clauses are never checked.",
+   "7": "Prints the exception message.",
+   "12": "The program carries on after the try statement."
+  }
+ },
+ {
+  "id": "unhandled",
+  "title": "No matching except: the exception escapes",
+  "section": "§3",
+  "blurb": "There is no ValueError clause, so the error is not handled: the program stops with a traceback and the last print never runs.",
+  "code": [
+   "L = [10, 20, 30, 40, 50]",
+   "",
+   "try:",
+   "    index = int(input('Enter Index to get value '))",
+   "    print(f'in array L at {index} value is {L[index]}')",
+   "except IndexError as msg:",
+   "    print(msg)",
+   "except TypeError as msg:",
+   "    print(msg)",
+   "print('End of Program')"
+  ],
+  "inputs": [
+   "abc"
+  ],
+  "notes": {
+   "1": "The list L is created.",
+   "3": "Entering the try block.",
+   "4": "int('abc') raises ValueError.",
+   "6": "Is a ValueError an IndexError? No.",
+   "8": "Is a ValueError a TypeError? No. No clauses are left, so the exception is not handled.",
+   "final": "No except clause matches ValueError, so the exception leaves the try statement and the program stops with a traceback. The last print never runs."
+  }
+ },
+ {
+  "id": "tuple_except",
+  "title": "One except for several exception types",
+  "section": "§3",
+  "blurb": "Put the classes in a tuple to share one handler. The exception object is bound to the name after as.",
+  "code": [
+   "L = [10, 20, 30, 40, 50]",
+   "",
+   "try:",
+   "    index = int(input('Enter Index to get value '))",
+   "    print(f'in array L at {index} value is {L[index]}')",
+   "except (IndexError, TypeError, ValueError) as msg:",
+   "    print(msg)",
+   "print('End of Program')"
+  ],
+  "inputs": [
+   "10"
+  ],
+  "notes": {
+   "1": "The list L is created.",
+   "3": "Entering the try block.",
+   "4": "index = 10.",
+   "5": "L[10] raises IndexError.",
+   "6": "The tuple (IndexError, TypeError, ValueError) matches if the exception is any one of them. IndexError is in the tuple, so this handler runs.",
+   "7": "Prints the exception message.",
+   "8": "The program carries on after the try statement."
+  }
+ },
+ {
+  "id": "else_ok",
+  "title": "try-except-else: else runs only on success",
+  "section": "§4",
+  "blurb": "No exception was raised, so the except block is skipped and the else block confirms the try block finished cleanly.",
+  "code": [
+   "L = [10, 20, 30, 40, 50]",
+   "",
+   "try:",
+   "    index = int(input('Enter Index to get value '))",
+   "    print(f'in array L at {index} value is {L[index]}')",
+   "except Exception as msg:",
+   "    print(msg)",
+   "else:",
+   "    print('Successfully value Fetched')",
+   "print('End of Program')"
+  ],
+  "inputs": [
+   "2"
+  ],
+  "notes": {
+   "1": "The list L is created.",
+   "3": "Entering the try block.",
+   "4": "index = 2.",
+   "5": "L[2] is 30, so this prints fine and the try block finishes with no exception.",
+   "9": "No exception happened, so the else block runs. It confirms the try block succeeded.",
+   "10": "The program carries on."
+  }
+ },
+ {
+  "id": "else_err",
+  "title": "try-except-else: else is skipped after an error",
+  "section": "§4",
+  "blurb": "Index 10 raises IndexError, the except block handles it, and the else block is skipped.",
+  "code": [
+   "L = [10, 20, 30, 40, 50]",
+   "",
+   "try:",
+   "    index = int(input('Enter Index to get value '))",
+   "    print(f'in array L at {index} value is {L[index]}')",
+   "except Exception as msg:",
+   "    print(msg)",
+   "else:",
+   "    print('Successfully value Fetched')",
+   "print('End of Program')"
+  ],
+  "inputs": [
+   "10"
+  ],
+  "notes": {
+   "1": "The list L is created.",
+   "3": "Entering the try block.",
+   "4": "index = 10.",
+   "5": "L[10] raises IndexError.",
+   "6": "except Exception matches (IndexError is a kind of Exception).",
+   "7": "Prints the error message. The else block (lines 8-9) is skipped because an exception happened.",
+   "10": "The program carries on."
+  }
+ },
+ {
+  "id": "finally_err",
+  "title": "finally runs even when an error occurred",
+  "section": "§5",
+  "blurb": "The error is handled by except, else is skipped, and finally still runs.",
+  "code": [
+   "L = [10, 20, 30, 40, 50]",
+   "",
+   "try:",
+   "    index = int(input('Enter Index to get value '))",
+   "    print(f'in array L at {index} value is {L[index]}')",
+   "except Exception as msg:",
+   "    print(msg)",
+   "else:",
+   "    print('Successfully value Fetched')",
+   "finally:",
+   "    print('End of Program')"
+  ],
+  "inputs": [
+   "abc"
+  ],
+  "notes": {
+   "1": "The list L is created.",
+   "3": "Entering the try block.",
+   "4": "int('abc') raises ValueError.",
+   "6": "except Exception matches the ValueError.",
+   "7": "Prints the error message. The else block is skipped.",
+   "11": "finally runs no matter what happened above - here after the handled error."
+  }
+ },
+ {
+  "id": "finally_ok",
+  "title": "finally also runs when there is no error",
+  "section": "§5",
+  "blurb": "No error: else runs, then finally runs. finally runs in both cases, that is its job.",
+  "code": [
+   "L = [10, 20, 30, 40, 50]",
+   "",
+   "try:",
+   "    index = int(input('Enter Index to get value '))",
+   "    print(f'in array L at {index} value is {L[index]}')",
+   "except Exception as msg:",
+   "    print(msg)",
+   "else:",
+   "    print('Successfully value Fetched')",
+   "finally:",
+   "    print('End of Program')"
+  ],
+  "inputs": [
+   "2"
+  ],
+  "notes": {
+   "1": "The list L is created.",
+   "3": "Entering the try block.",
+   "4": "index = 2.",
+   "5": "L[2] is 30. No exception.",
+   "9": "No exception, so else runs.",
+   "11": "finally runs here too: with or without an exception, it always runs."
+  }
+ },
+ {
+  "id": "finally_func",
+  "title": "finally inside a function with return",
+  "section": "§5",
+  "blurb": "return c is executed first, but finally runs before the function really hands control back to the caller.",
+  "code": [
+   "def div(a, b):",
+   "    try:",
+   "        c = a // b",
+   "        return c",
+   "    except ZeroDivisionError as err:",
+   "        raise ZeroDivisionError",
+   "    finally:",
+   "        print('finally block')",
+   "z = div(10, 2)",
+   "print(z)"
+  ],
+  "inputs": [],
+  "notes": {
+   "1": "def creates the function div. The body does not run yet.",
+   "9": "Calling div(10, 2). A new frame for div appears on the call stack.",
+   "2": "Entering the try block inside div.",
+   "3": "10 // 2 = 5, so c = 5.",
+   "4": "return c prepares to return 5 - but a finally block is attached, so Python runs it before leaving the function.",
+   "8": "finally runs even though the function was already returning. After it, the value 5 goes back to the caller.",
+   "10": "z = 5 is printed."
+  }
+ },
+ {
+  "id": "finally_func_err",
+  "title": "finally while an exception propagates",
+  "section": "§5",
+  "blurb": "div(10, 0) fails, the except block re-raises, finally still prints, and only then does the exception continue to the caller (and crash the program).",
+  "code": [
+   "def div(a, b):",
+   "    try:",
+   "        c = a // b",
+   "        return c",
+   "    except ZeroDivisionError as err:",
+   "        raise ZeroDivisionError",
+   "    finally:",
+   "        print('finally block')",
+   "z = div(10, 0)",
+   "print(z)"
+  ],
+  "inputs": [],
+  "notes": {
+   "1": "def creates the function div.",
+   "9#1": "Calling div(10, 0). A new frame for div appears on the call stack.",
+   "2": "Entering the try block inside div.",
+   "3": "10 // 0 raises ZeroDivisionError.",
+   "5": "The except clause matches ZeroDivisionError and binds it to err.",
+   "6": "raise ZeroDivisionError throws a fresh exception from inside the handler, so it will leave the function.",
+   "8": "finally still runs before the exception leaves the function - this is what makes it ideal for clean-up (closing files, releasing connections).",
+   "final": "The new ZeroDivisionError propagates to the caller at line 9. Nothing there handles it, so the program stops. print(z) never runs."
+  }
+ },
+ {
+  "id": "nested_inner",
+  "title": "Nested try: the inner handler catches it",
+  "section": "§6",
+  "blurb": "The bad second number raises ValueError inside the inner try, whose own except handles it. The outer try never sees an error.",
+  "code": [
+   "try:",
+   "    a = int(input('enter first number : '))",
+   "    try:",
+   "        b = int(input('enter second number : '))",
+   "        c = a // b",
+   "        print(c)",
+   "    except ZeroDivisionError as e:",
+   "        print(e)",
+   "    except ValueError:",
+   "        print('value error inner')",
+   "except ValueError:",
+   "    print('value error outer')"
+  ],
+  "inputs": [
+   "10",
+   "abc"
+  ],
+  "notes": {
+   "1": "Outer try begins.",
+   "2": "a = 10.",
+   "3": "Inner try begins.",
+   "4": "int('abc') raises ValueError. The inner try is the innermost one, so its handlers are checked first.",
+   "7": "Inner clause 1: is it a ZeroDivisionError? No.",
+   "9": "Inner clause 2: is it a ValueError? Yes - handled here, the outer except is never consulted.",
+   "10": "Prints the inner message. The program then ends normally."
+  }
+ },
+ {
+  "id": "nested_outer",
+  "title": "Nested try: only the outer handler fits",
+  "section": "§6",
+  "blurb": "The bad first number fails before the inner try is even entered, so the outer except handles it.",
+  "code": [
+   "try:",
+   "    a = int(input('enter first number : '))",
+   "    try:",
+   "        b = int(input('enter second number : '))",
+   "        c = a // b",
+   "        print(c)",
+   "    except ZeroDivisionError as e:",
+   "        print(e)",
+   "    except ValueError:",
+   "        print('value error inner')",
+   "except ValueError:",
+   "    print('value error outer')"
+  ],
+  "inputs": [
+   "abc"
+  ],
+  "notes": {
+   "1": "Outer try begins.",
+   "2": "int('abc') raises ValueError. The inner try has not even been entered yet, so it cannot help.",
+   "11": "The outer except ValueError matches.",
+   "12": "Prints the outer message."
+  }
+ },
+ {
+  "id": "nested_zero",
+  "title": "Nested try: ZeroDivisionError inside",
+  "section": "§6",
+  "blurb": "Zero is a valid int, so the first int() calls pass; the division fails and the inner ZeroDivisionError handler prints the message.",
+  "code": [
+   "try:",
+   "    a = int(input('enter first number : '))",
+   "    try:",
+   "        b = int(input('enter second number : '))",
+   "        c = a // b",
+   "        print(c)",
+   "    except ZeroDivisionError as e:",
+   "        print(e)",
+   "    except ValueError:",
+   "        print('value error inner')",
+   "except ValueError:",
+   "    print('value error outer')"
+  ],
+  "inputs": [
+   "10",
+   "0"
+  ],
+  "notes": {
+   "1": "Outer try begins.",
+   "2": "a = 10.",
+   "3": "Inner try begins.",
+   "4": "b = 0.",
+   "5": "10 // 0 raises ZeroDivisionError.",
+   "7": "The inner except ZeroDivisionError matches and binds the exception to e.",
+   "8": "Prints the exception message."
+  }
+ },
+ {
+  "id": "nested_unbound",
+  "title": "Practice: nested try, inner error swallowed",
+  "section": "§6",
+  "blurb": "The inner except handles ValueError, but index was never assigned. The next line then fails with UnboundLocalError (a kind of NameError), and the outer handler for NameError catches it.",
+  "code": [
+   "L = [10, 20, 30, 40, 50]",
+   "",
+   "def fun_with_valueError():",
+   "    try:",
+   "        try:",
+   "            index = int(input('Enter Index '))",
+   "        except ValueError as e:",
+   "            logger.exception(e)",
+   "        print(L[index])",
+   "    except IndexError as e:",
+   "        logger.exception(e)",
+   "    except NameError as e:",
+   "        logger.exception(e)",
+   "",
+   "fun_with_valueError()",
+   "print('End of Program')"
+  ],
+  "inputs": [
+   "abc"
+  ],
+  "notes": {
+   "1": "The list L is created.",
+   "3": "def creates the function.",
+   "15": "Calling fun_with_valueError(). A new frame appears on the call stack.",
+   "4": "Outer try begins inside the function.",
+   "5": "Inner try begins.",
+   "6": "int('abc') raises ValueError, so index is never assigned.",
+   "7": "The inner except ValueError matches.",
+   "8": "logger.exception(e) records the problem and the program carries on - but index still has no value.",
+   "9": "L[index] reads index, which was never assigned. Inside a function this is an UnboundLocalError (a subclass of NameError). Python says: cannot access local variable 'index'.",
+   "10": "Is it an IndexError? No.",
+   "12": "Is it a NameError? Yes - UnboundLocalError is a NameError subclass, so this clause matches.",
+   "13": "Logs the message. The function ends normally.",
+   "16": "The program continues and finishes."
+  }
+ },
+ {
+  "id": "nested_unbound_crash",
+  "title": "Practice: forgetting the NameError handler",
+  "section": "§6",
+  "blurb": "Same flow without an except NameError clause: UnboundLocalError escapes the function and the program ends with a traceback.",
+  "code": [
+   "L = [10, 20, 30, 40, 50]",
+   "",
+   "def fun_without_valueError():",
+   "    try:",
+   "        try:",
+   "            index = int(input('Enter Index '))",
+   "        except ValueError as e:",
+   "            logger.exception(e)",
+   "        print(L[index])",
+   "    except IndexError as e:",
+   "        logger.exception(e)",
+   "",
+   "fun_without_valueError()",
+   "print('End of Program')"
+  ],
+  "inputs": [
+   "abc"
+  ],
+  "notes": {
+   "1": "The list L is created.",
+   "3": "def creates the function.",
+   "13#1": "Calling fun_without_valueError(). A new frame appears on the call stack.",
+   "4": "Outer try begins.",
+   "5": "Inner try begins.",
+   "6": "int('abc') raises ValueError, so index is never assigned.",
+   "7": "The inner except ValueError matches.",
+   "8": "logs the error and continues - index still has no value.",
+   "9": "L[index] fails with UnboundLocalError because index was never assigned.",
+   "10": "Is it an IndexError? No. The outer try has no other clause, so the exception is not handled.",
+   "final": "UnboundLocalError escapes the function and nothing at the call site handles it, so the program stops with a traceback (exit code 1). Adding except NameError fixes it."
+  }
+ },
+ {
+  "id": "raise_stmt",
+  "title": "raise: the function reports a problem to its caller",
+  "section": "§7",
+  "blurb": "fun_div raises ZeroDivisionError itself when b is 0. The exception travels up the call stack to the try block that called it.",
+  "code": [
+   "def fun_div(a, b):",
+   "    if b != 0:",
+   "        c = a / b",
+   "        return c",
+   "    else:",
+   "        raise ZeroDivisionError",
+   "",
+   "try:",
+   "    c = fun_div(10, 2)",
+   "    print(c)",
+   "    c = fun_div(10, 0)",
+   "except Exception as msg:",
+   "    logger.exception(msg)",
+   "",
+   "print('End of Program')"
+  ],
+  "inputs": [],
+  "notes": {
+   "1": "def creates fun_div.",
+   "8": "Entering the try block at module level.",
+   "9": "Calling fun_div(10, 2). A frame for fun_div appears on the call stack.",
+   "2#1": "b is 2, which is not 0, so the if branch runs.",
+   "3": "c = 10 / 2 = 5.0.",
+   "4": "return sends 5.0 back to the caller and the frame disappears.",
+   "10": "Prints 5.0.",
+   "11": "Calling fun_div(10, 0). A new frame appears.",
+   "2#2": "b is 0, so the condition is False and the else branch runs.",
+   "6": "raise ZeroDivisionError creates and throws the exception on purpose. The function stops here and the exception travels to the caller.",
+   "12": "Back in the caller, except Exception matches.",
+   "13": "logger.exception(msg) prints the message. A ZeroDivisionError raised without arguments has an empty message, so an empty line is printed.",
+   "15": "The program ends normally."
+  }
+ },
+ {
+  "id": "user_defined",
+  "title": "User-defined exception: NegativeError",
+  "section": "§8",
+  "blurb": "area() raises the custom NegativeError for a negative dimension; the except block receives it and shows its __str__ message.",
+  "code": [
+   "class NegativeError(Exception):",
+   "    def __init__(self):",
+   "        self.msg = '-ve Dimension'",
+   "",
+   "    def __str__(self):",
+   "        return self.msg",
+   "",
+   "def area(length, breadth):",
+   "    if length > 0 and breadth > 0:",
+   "        return length * breadth",
+   "    else:",
+   "        raise NegativeError()",
+   "",
+   "try:",
+   "    result = area(-5, 10)",
+   "except Exception as msg:",
+   "    logger.exception(msg)"
+  ],
+  "inputs": [],
+  "notes": {
+   "1#1": "Python starts creating the class NegativeError, a subclass of Exception.",
+   "1#2": "The class body is executed.",
+   "2": "def __init__ is stored in the class (it runs later when an object is created).",
+   "5": "def __str__ is stored too: it controls what print(e) or logging shows.",
+   "8": "def creates the function area.",
+   "14": "Entering the try block.",
+   "15": "Calling area(-5, 10). A frame for area appears on the call stack.",
+   "9": "length is -5, so length > 0 is False and the else branch runs.",
+   "12": "raise NegativeError() creates the exception object (which runs __init__) and throws it.",
+   "3": "Inside __init__ the message '-ve Dimension' is stored on the exception object.",
+   "16": "Back in the caller, except Exception matches the NegativeError (it inherits from Exception).",
+   "17": "logger.exception(msg) shows the message produced by __str__: -ve Dimension."
+  }
+ },
+ {
+  "id": "my_error",
+  "title": "User-defined exception: the minimal form (PDF)",
+  "section": "§8",
+  "blurb": "class MyError(Exception): pass is enough. raise MyError('My Error') passes the message to the exception.",
+  "code": [
+   "class MyError(Exception):",
+   "    pass",
+   "",
+   "try:",
+   "    raise MyError('My Error')",
+   "except MyError as e:",
+   "    print(e)"
+  ],
+  "inputs": [],
+  "notes": {
+   "1#1": "Python starts creating the class MyError, a subclass of Exception.",
+   "1#2": "The class body is executed.",
+   "2": "pass: the class adds nothing new. It still works as a custom exception type because it inherits everything from Exception.",
+   "4": "Entering the try block.",
+   "5": "raise MyError('My Error') throws the exception with the message 'My Error'.",
+   "6": "except MyError matches exactly and binds the exception to e.",
+   "7": "print(e) shows the message: My Error."
+  }
+ },
+ {
+  "id": "logging_demo",
+  "title": "Practice: logging an exception",
+  "section": "§9",
+  "blurb": "The handler hands the exception to logger.exception(), which records the message (and, in real logging, the full traceback) instead of crashing the program.",
+  "code": [
+   "def fun_divide_number(a, b):",
+   "    try:",
+   "        result = a / b",
+   "        return result",
+   "    except Exception as msg:",
+   "        logger.exception(msg)",
+   "",
+   "fun_divide_number(10, 0)",
+   "print('End of Program')"
+  ],
+  "inputs": [],
+  "notes": {
+   "1": "def creates the function fun_divide_number.",
+   "8": "Calling fun_divide_number(10, 0). A frame appears on the call stack.",
+   "2": "Entering the try block.",
+   "3": "10 / 0 raises ZeroDivisionError.",
+   "5": "except Exception matches.",
+   "6": "logger.exception(msg) logs the error at ERROR level. In the real program this also prints the full traceback to the log. The function returns None.",
+   "9": "The program carries on and prints the last line."
+  }
+ },
+ {
+  "id": "logic_error",
+  "title": "Logical error: no exception, wrong answer",
+  "section": "§1",
+  "blurb": "Both branches print a, so the program never reports 50 as the greater value. Nothing crashes, which is why logical errors are the hardest to find. (Also: input() returns text, so the comparison is between strings.)",
+  "code": [
+   "a = input('Enter value of A ')",
+   "b = input('Enter value of B ')",
+   "",
+   "if a>b:",
+   "    print(f'From A and B {a} is greater value')",
+   "else:",
+   "    print(f'From A and B {a} is greater value') # Logical Error"
+  ],
+  "inputs": [
+   "10",
+   "50"
+  ],
+  "notes": {
+   "1": "input() always returns text: a = '10' (a string, not a number).",
+   "2": "b = '50' (also a string).",
+   "4": "'10' > '50' compares the strings character by character: '1' is smaller than '5', so the condition is False and the else branch runs.",
+   "7": "This is the logical error: the else branch prints a, not b. The program runs without any exception but reports the wrong answer."
+  }
+ },
+ {
+  "id": "type_error",
+  "title": "Runtime error: TypeError from input()",
+  "section": "§1",
+  "blurb": "Both values are strings, and // is not defined for strings, so Python raises TypeError at runtime.",
+  "code": [
+   "a = input('Enter value of A ')",
+   "b = input('Enter value of B ')",
+   "",
+   "c = a // b",
+   "print(f'a // b is {c}')"
+  ],
+  "inputs": [
+   "10",
+   "5"
+  ],
+  "notes": {
+   "1": "input() returns text: a = '10'.",
+   "2": "b = '5'.",
+   "4": "// is not defined for two strings, so Python raises TypeError. int(input(...)) would have avoided it."
+  }
+ }
+]
