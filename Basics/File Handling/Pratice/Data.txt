@@ -1,0 +1,16 @@
+My Name is Subarna
+I am here to learn Python
+
+File Modes are:
+r Read from a File
+w write to a File
+a append to File
+r+ Read & Write
+w+ Write and Read
+a+ Append & Read
+x  Write in a new File only
+
+For Binary File
+rb Read Binary File
+wb Write Binary File
+ap Append Binary File
