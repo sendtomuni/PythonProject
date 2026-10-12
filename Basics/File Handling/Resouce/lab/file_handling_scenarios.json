@@ -1,0 +1,472 @@
+[
+ {
+  "id": "read_all",
+  "title": "read() the whole file",
+  "section": "§2",
+  "blurb": "open() in 'r' mode gives a file handle with the pointer at 0; read() returns everything and leaves the pointer at the end.",
+  "code": [
+   "file = open('MyData.txt', 'r')",
+   "str1 = file.read()",
+   "print(str1)",
+   "file.close()"
+  ],
+  "setup": {
+   "MyData.txt": "This is  a test file\nit is stored in hard disk"
+  },
+  "notes": {
+   "1": "open() finds MyData.txt and returns a file handle (a TextIOWrapper). The pointer starts at position 0 – the T.",
+   "2": "read() with no size reads from the pointer to the end of the file: all 46 characters, including the \\n between the lines. The pointer is now at 46 (end of file).",
+   "3": "print() shows the string. The \\n inside it makes the second line appear on its own row.",
+   "4": "close() releases the file. The handle shows closed = True. The text in str1 stays – it is a normal string in memory now."
+  }
+ },
+ {
+  "id": "pointer",
+  "title": "read(n) moves the file pointer",
+  "section": "§2",
+  "blurb": "read(6) returns 6 characters and moves the pointer 6 places; the next read(10) continues from there.",
+  "code": [
+   "file = open('MyData.txt', 'r')",
+   "str1 = file.read(6)",
+   "print(str1)",
+   "str1 = file.read(10)",
+   "print(str1)",
+   "print(file.tell())",
+   "file.close()"
+  ],
+  "setup": {
+   "MyData.txt": "This is  a test file\nit is stored in hard disk"
+  },
+  "notes": {
+   "1": "The pointer starts at 0, in front of the T.",
+   "2": "read(6) takes 6 characters: T h i s ␠ i. The pointer moves to 6, in front of the s.",
+   "3": "Prints This i.",
+   "4": "read(10) continues from 6, not from 0: s ␠ ␠ a ␠ t e s t ␠. The pointer moves to 16.",
+   "5": "Prints s  a test  – the read started where the previous one stopped.",
+   "6": "tell() reports the pointer: 16. It is the number of characters already consumed.",
+   "7": "close() – the file is released."
+  }
+ },
+ {
+  "id": "closed_err",
+  "title": "Using a file after close()",
+  "section": "§2",
+  "blurb": "close() releases the file. The handle object still exists (name, mode work) but any I/O on it raises ValueError.",
+  "code": [
+   "file = open('MyData.txt', 'r')",
+   "file.close()",
+   "print(file.name)",
+   "print(file.mode)",
+   "print(file.closed)",
+   "file.read()"
+  ],
+  "setup": {
+   "MyData.txt": "apples are red\ngrapes are green\n"
+  },
+  "notes": {
+   "1": "Open for reading.",
+   "2": "close() immediately.",
+   "3": "The handle object still exists – its attributes still work: name.",
+   "4": "mode → r.",
+   "5": "closed → True.",
+   "6": "Any I/O on a closed file raises ValueError: I/O operation on closed file."
+  }
+ },
+ {
+  "id": "with_block",
+  "title": "with closes the file for you",
+  "section": "§2",
+  "blurb": "The with statement calls close() automatically when the block ends, even if an error happens inside it.",
+  "code": [
+   "with open('Prop.txt', 'w') as file:",
+   "    file.writelines(['python is simple\\n', 'it is easy\\n'])",
+   "    print(file.closed)",
+   "print(file.closed)",
+   "print(open('Prop.txt').read(), end='')"
+  ],
+  "notes": {
+   "1": "with ... as file: opens the file and binds the handle to file.",
+   "2": "writelines() writes each string of the list as is – it does NOT add newlines, so each item carries its own \\n. Buffered.",
+   "3": "Inside the block the file is open: False.",
+   "4": "Leaving the block runs the with line again to exit: close() is called automatically and the buffer is flushed to disk.",
+   "5": "Outside the block: True.",
+   "6": "Read it back with a new handle: both lines are there."
+  }
+ },
+ {
+  "id": "w_mode",
+  "title": "'w' mode overwrites",
+  "section": "§3",
+  "blurb": "From overwrittingFile.py: every open(..., 'w') wipes the file first, so only the last version survives.",
+  "code": [
+   "file = open('overwrite.txt', 'w')",
+   "file.write('Writing Version 0')",
+   "file.close()",
+   "file = open('overwrite.txt', 'w')",
+   "file.write('Writing Version 1')",
+   "file.close()",
+   "file = open('overwrite.txt', 'r')",
+   "print(file.read())",
+   "file.close()"
+  ],
+  "notes": {
+   "1": "'w' creates overwrite.txt (it did not exist) and the file is empty – 0 bytes.",
+   "2": "write() returns 17 and moves the pointer to 17, but the text is still in Python's write buffer – the file on disk is still empty.",
+   "3": "close() flushes the buffer to disk. Now the file holds Writing Version 0.",
+   "4": "Opening the SAME file again with 'w' wipes it instantly – the old text is gone before anything is written.",
+   "5": "Version 1 goes into the buffer (pointer 17); disk still empty.",
+   "6": "close() flushes: the file now holds only Writing Version 1.",
+   "7": "Reopen in 'r' to check what survived. Pointer at 0.",
+   "8": "Prints Writing Version 1 – the comment in overwrittingFile.py is right.",
+   "9": "close()."
+  }
+ },
+ {
+  "id": "a_mode",
+  "title": "'a' mode appends",
+  "section": "§3",
+  "blurb": "From appendFile.py: 'a' creates the file if needed and always writes at the end, so both versions stay.",
+  "code": [
+   "file = open('append.txt', 'a')",
+   "file.write('Writing Version 0')",
+   "file.close()",
+   "file = open('append.txt', 'a')",
+   "file.write('Writing Version 1')",
+   "file.close()",
+   "file = open('append.txt', 'r')",
+   "print(file.read())",
+   "file.close()"
+  ],
+  "notes": {
+   "1": "'a' creates append.txt because it does not exist (append mode does NOT need the file to exist). Pointer at 0 of an empty file.",
+   "2": "Version 0 goes into the buffer; pointer 17.",
+   "3": "close() flushes – the file holds Writing Version 0.",
+   "4": "Opening with 'a' keeps the content and puts the pointer at the END (17).",
+   "5": "Version 1 is buffered after the existing text; pointer 34.",
+   "6": "close() flushes – both versions are on disk, with no newline between them because none was written.",
+   "7": "Reopen for reading.",
+   "8": "Prints Writing Version 0Writing Version 1. Run appendFile.py again and the text grows again – append never wipes.",
+   "9": "close()."
+  }
+ },
+ {
+  "id": "x_mode",
+  "title": "'x' mode: new files only",
+  "section": "§3",
+  "blurb": "From writingToNewFileOnly.py: 'x' creates and writes a brand-new file, and raises FileExistsError if the file is already there.",
+  "code": [
+   "file = open('newWrite.txt', 'x')",
+   "file.write('Writing Version 2')",
+   "file.close()",
+   "file = open('overwrite.txt', 'x')"
+  ],
+  "setup": {
+   "overwrite.txt": "Writing Version 1"
+  },
+  "notes": {
+   "1": "'x' = exclusive creation. newWrite.txt does not exist, so Python creates it.",
+   "2": "Write into the buffer – pointer 17, disk still empty.",
+   "3": "close() flushes – newWrite.txt now holds Writing Version 2.",
+   "4": "overwrite.txt already exists, so 'x' refuses to open it. Nothing is created or wiped and the line raises FileExistsError – exactly what writingToNewFileOnly.py logs."
+  }
+ },
+ {
+  "id": "r_plus",
+  "title": "'r+' read then write",
+  "section": "§3",
+  "blurb": "From readWriteFile.py: r+ keeps the content; after read() the pointer is at the end, so write() adds 123 after ABCDEF.",
+  "code": [
+   "file = open('my.dat', 'r+')",
+   "data = file.read()",
+   "print(data)",
+   "file.write('123')",
+   "file.close()"
+  ],
+  "setup": {
+   "my.dat": "ABCDEF"
+  },
+  "notes": {
+   "1": "'r+' opens an EXISTING file for reading and writing. Nothing is wiped; pointer at 0.",
+   "2": "read() consumes everything – the pointer is now at 6, after the F.",
+   "3": "Prints ABCDEF.",
+   "4": "write() writes at the pointer, which is at the end, so 123 goes after ABCDEF (buffered for now).",
+   "5": "close() flushes – the file holds ABCDEF123, as the comment in readWriteFile.py says."
+  }
+ },
+ {
+  "id": "w_plus",
+  "title": "'w+' write then read",
+  "section": "§3",
+  "blurb": "From readWriteFile.py: w+ wipes the file on open; after write() the pointer is past the new text, so read() returns '' until you seek(0).",
+  "code": [
+   "file = open('my.dat', 'w+')",
+   "file.write('789')",
+   "data = file.read()",
+   "print(repr(data))",
+   "file.seek(0, 0)",
+   "data = file.read()",
+   "print(data)",
+   "file.close()"
+  ],
+  "setup": {
+   "my.dat": "ABCDEF123"
+  },
+  "notes": {
+   "1": "'w+' wipes the file the moment it opens – ABCDEF123 is gone. Pointer at 0.",
+   "2": "789 is written into the buffer; the pointer moves to 3.",
+   "3": "read() reads from the pointer, which is already at 3 = end of file, so it returns ''. (read() also flushes the pending write, so 789 is now on disk.)",
+   "4": "Prints '' – empty, even though the file holds 789.",
+   "5": "seek(0, 0) moves the pointer back to the start (offset 0, from the beginning).",
+   "6": "Now read() returns '789'.",
+   "7": "Prints 789.",
+   "8": "close()."
+  }
+ },
+ {
+  "id": "w_plus_first",
+  "title": "'w+' read first = empty",
+  "section": "§3",
+  "blurb": "fun_WriteAndReadInDifferentOrder from readWriteFile.py: the wipe happens inside open(), before read() runs.",
+  "code": [
+   "file = open('my.dat', 'w+')",
+   "data = file.read()",
+   "print(repr(data))",
+   "file.write('10 11 12')",
+   "file.close()"
+  ],
+  "setup": {
+   "my.dat": "789"
+  },
+  "notes": {
+   "1": "'w+' wipes the file inside open() – 789 is gone before any other line runs.",
+   "2": "read() on an empty file returns ''.",
+   "3": "Prints '' – this is the blank output explained in the comments of readWriteFile.py.",
+   "4": "10 11 12 goes into the buffer.",
+   "5": "close() flushes – the file holds 10 11 12."
+  }
+ },
+ {
+  "id": "a_plus",
+  "title": "'a+' append and read",
+  "section": "§3",
+  "blurb": "a+ starts with the pointer at the END, so read() is empty until you seek(0); write() always goes to the end.",
+  "code": [
+   "file = open('my.dat', 'a+')",
+   "print(file.tell())",
+   "print(repr(file.read()))",
+   "file.seek(0)",
+   "print(file.read())",
+   "file.write('!')",
+   "file.close()"
+  ],
+  "setup": {
+   "my.dat": "10 11 12"
+  },
+  "notes": {
+   "1": "'a+' keeps the content and starts with the pointer at the END (8).",
+   "2": "tell() confirms: 8.",
+   "3": "read() from the end returns '' – a common surprise with a+.",
+   "4": "seek(0) moves to the start so reading works.",
+   "5": "Prints 10 11 12; the pointer is back at the end.",
+   "6": "In append mode every write goes to the end, wherever the pointer is.",
+   "7": "close() flushes – the file holds 10 11 12!"
+  }
+ },
+ {
+  "id": "readline",
+  "title": "readline() vs readlines()",
+  "section": "§4",
+  "blurb": "readline() returns one line including its \\n; readlines() returns the remaining lines as a list; at the end of file you get '' or [].",
+  "code": [
+   "file = open('MyData.txt', 'r')",
+   "line = file.readline()",
+   "print(line, end='')",
+   "line = file.readline()",
+   "print(line, end='')",
+   "print(file.readline() == '')",
+   "file.seek(0)",
+   "print(file.readlines())",
+   "file.close()",
+   "print(file.closed)"
+  ],
+  "setup": {
+   "MyData.txt": "apples are red\ngrapes are green\n"
+  },
+  "notes": {
+   "1": "Pointer at 0.",
+   "2": "readline() reads up to and including the first \\n: 'apples are red\\n'. The pointer moves to 15 (start of line 2).",
+   "3": "end='' stops print() adding a second newline – the line already ends with \\n. Without it you get a blank line between the lines (the PDF output).",
+   "4": "The next readline() continues from 15 and returns 'grapes are green\\n'. Pointer at 32 = end of file.",
+   "5": "Prints the second line.",
+   "6": "At the end of the file readline() returns an empty string '' – that is how you detect EOF.",
+   "7": "seek(0) moves the pointer back to the start so the file can be read again.",
+   "8": "readlines() reads every remaining line into a list of strings, each keeping its \\n.",
+   "9": "close().",
+   "10": "closed is a property (no brackets) – True after close()."
+  }
+ },
+ {
+  "id": "flush",
+  "title": "write() is buffered until flush()",
+  "section": "§4",
+  "blurb": "write() first lands in a memory buffer. flush() pushes it to the disk; close() flushes too. Watch the file on disk stay empty.",
+  "code": [
+   "file = open('Prop.txt', 'w')",
+   "file.write('python is simple\\n')",
+   "file.flush()",
+   "file.write('it is easy\\n')",
+   "print(open('Prop.txt').read(), end='')",
+   "file.close()",
+   "print(open('Prop.txt').read(), end='')"
+  ],
+  "notes": {
+   "1": "Open for writing; empty file.",
+   "2": "write() puts the text in a memory buffer; disk still empty.",
+   "3": "flush() pushes the buffer to disk now, without closing.",
+   "4": "The second line is buffered again.",
+   "5": "A second reader sees only what was flushed: python is simple.",
+   "6": "close() flushes the rest and releases the file.",
+   "7": "Now both lines are on disk."
+  }
+ },
+ {
+  "id": "seek_tell",
+  "title": "seek() and tell() on a binary file",
+  "section": "§5",
+  "blurb": "The fileOperation.ipynb walk-through on test.txt (ABCDEFGHIJ): whence 0 = from start, 1 = from current, 2 = from end.",
+  "code": [
+   "file = open('test.txt', 'rb')",
+   "print(file.read(2))",
+   "print(file.tell())",
+   "file.seek(4, 0)",
+   "print(file.read(2))",
+   "file.seek(2, 1)",
+   "print(file.read(1))",
+   "print(file.tell())",
+   "file.seek(-8, 1)",
+   "print(file.read(3))",
+   "file.seek(-2, 2)",
+   "print(file.read(2))",
+   "file.close()"
+  ],
+  "setup": {
+   "test.txt": "ABCDEFGHIJ"
+  },
+  "binary": [
+   "test.txt"
+  ],
+  "notes": {
+   "1": "'rb' opens test.txt as raw bytes. Pointer at 0 (A).",
+   "2": "read(2) returns bytes b'AB' – the b prefix means bytes, not str. Pointer 2.",
+   "3": "tell() → 2.",
+   "4": "seek(4, 0): 4 bytes from the BEGINNING → pointer at 4 (E).",
+   "5": "read(2) → b'EF'. Pointer 6.",
+   "6": "seek(2, 1): 2 bytes forward from the CURRENT position 6 → 8 (I).",
+   "7": "read(1) → b'I'. Pointer 9.",
+   "8": "tell() → 9 (the J).",
+   "9": "seek(-8, 1): 8 bytes BACK from the current position 9 → 1 (B). Negative offsets are allowed in binary mode.",
+   "10": "read(3) → b'BCD'. Pointer 4.",
+   "11": "seek(-2, 2): 2 bytes back from the END (10) → 8 (I).",
+   "12": "read(2) → b'IJ'. Pointer 10 = end of file.",
+   "13": "close()."
+  }
+ },
+ {
+  "id": "text_seek_err",
+  "title": "Text mode cannot seek from current",
+  "section": "§5",
+  "blurb": "Relative seeks (whence 1 or 2 with a non-zero offset) only work in binary mode. In text mode Python refuses.",
+  "code": [
+   "file = open('test.txt', 'r')",
+   "print(file.read(2))",
+   "file.seek(-1, 1)"
+  ],
+  "setup": {
+   "test.txt": "ABCDEFGHIJ"
+  },
+  "notes": {
+   "1": "Same file, but opened in TEXT mode 'r'.",
+   "2": "read(2) → 'AB' (a str this time, no b prefix).",
+   "3": "In text mode only seek(n, 0) and seek(0, 1) / seek(0, 2) are allowed. A non-zero offset from the current position raises io.UnsupportedOperation. Open the file with 'rb' for relative seeks."
+  }
+ },
+ {
+  "id": "struct_records",
+  "title": "Fixed-size records with struct",
+  "section": "§6",
+  "blurb": "binaryOperations.py, flattened: each player is packed into 14 bytes ('i10s'), so record N starts at byte N*14.",
+  "code": [
+   "import struct",
+   "file = open('palyer.dat', 'ab')",
+   "file.write(struct.pack('i10s', 14, 'Smith'.encode().ljust(10)))",
+   "file.write(struct.pack('i10s', 18, 'Kohli'.encode().ljust(10)))",
+   "file.write(struct.pack('i10s', 7, 'Dhoni'.encode().ljust(10)))",
+   "file.close()",
+   "f = open('palyer.dat', 'rb')",
+   "f.seek(2 * 14)",
+   "record = f.read(14)",
+   "id, name = struct.unpack('i10s', record)",
+   "print(f'Id: {id}, Name : {name.decode()}')",
+   "f.close()"
+  ],
+  "binary": [
+   "palyer.dat"
+  ],
+  "notes": {
+   "1": "struct converts Python values to fixed-size bytes.",
+   "2": "'ab' = append binary; creates palyer.dat. Pointer 0.",
+   "3": "pack('i10s', 14, b'Smith     ') → 4 bytes for the int 14 (0e 00 00 00, little-endian) + 10 bytes for the name = 14 bytes. In the buffer, not yet on disk.",
+   "4": "Record 2 (Kohli, id 18 = 0x12). Pointer 28.",
+   "5": "Record 3 (Dhoni, id 7). Pointer 42 = 3 × 14.",
+   "6": "close() flushes all 42 bytes. Every record is exactly 14 bytes, which is what makes random access possible.",
+   "7": "Open the same file for reading bytes.",
+   "8": "Record index 2 starts at 2 × 14 = 28 – jump straight there with seek, no need to read records 0 and 1.",
+   "9": "read(14) takes exactly one record.",
+   "10": "unpack('i10s', ...) turns the 14 bytes back into (7, b'Dhoni     ').",
+   "11": "Prints Id: 7, Name : Dhoni (the name keeps its padding spaces – .strip() would remove them).",
+   "12": "close()."
+  }
+ },
+ {
+  "id": "pickle",
+  "title": "pickle.dump and pickle.load",
+  "section": "§7",
+  "blurb": "Student objects are turned into bytes with dump() (binary mode) and rebuilt with load(), one object per call.",
+  "code": [
+   "import pickle",
+   "from Student import Student",
+   "studs = [Student(10, 'John', 'cs'), Student(20, 'Ajay', 'ec')]",
+   "f = open('students.data', 'wb')",
+   "pickle.dump(studs[0], f)",
+   "pickle.dump(studs[1], f)",
+   "f.close()",
+   "f = open('students.data', 'rb')",
+   "s = pickle.load(f)",
+   "s.display()",
+   "s = pickle.load(f)",
+   "s.display()",
+   "s = pickle.load(f)"
+  ],
+  "binary": [
+   "students.data"
+  ],
+  "modules": {
+   "Student.py": "class Student:\n    def __init__(self, roll, name, dept):\n        self.roll = roll\n        self.name = name\n        self.dept = dept\n\n    def display(self):\n        print(f'Roll: {self.roll} \\nName: {self.name}\\nDept: {self.dept}')\n"
+  },
+  "notes": {
+   "1": "pickle serialises Python objects to bytes.",
+   "2": "Student lives in its own file (Student.py) and is imported, as in the PDF.",
+   "3": "Two Student objects in a list.",
+   "4": "Pickling must use a BINARY mode ('wb') – pickle writes bytes.",
+   "5": "dump() converts studs[0] into 69 bytes (class name + attributes) and writes them. Buffered for now.",
+   "6": "Second object – another 69 bytes, pointer 138.",
+   "7": "close() flushes: students.data holds both objects back-to-back. 80 04 95 is the pickle header (protocol 4).",
+   "8": "Open for reading bytes ('rb').",
+   "9": "load() reads exactly ONE object and rebuilds it: Student(roll=10, name='John', dept='cs'). Pointer 69.",
+   "10": "display() is a normal method of the rebuilt object.",
+   "11": "The next load() returns the second object. Pointer 138 = end.",
+   "12": "Roll 20 – Ajay.",
+   "13": "There is no third object. load() at the end of the file raises EOFError: Ran out of input – that is why the PDF loops exactly range(3) for 3 objects."
+  }
+ }
+]
