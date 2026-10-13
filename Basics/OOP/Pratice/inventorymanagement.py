@@ -2,14 +2,14 @@
 claude
 Don't generate lab for this
 """
-from collections import UserDict, _KT, _VT
+from collections import UserDict
 
 
 class InventoryManagement(UserDict):
     def __init__(self):
         super().__init__()
 
-    def __setitem__(self, key: _KT, item: _VT):
+    def __setitem__(self, key: str, item: int):
         if not isinstance(key, str) or not isinstance(item, int):
             raise TypeError('Key should be string and value should be int')
         super().__setitem__(key.casefold(), item)
