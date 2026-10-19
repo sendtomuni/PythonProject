@@ -1,0 +1,1987 @@
+[
+ {
+  "id": "commit",
+  "title": "execute() then commit()",
+  "section": "connecttodatabase / InsertIntoDatabase",
+  "blurb": "execute() only queues the change inside a transaction. Only commit() writes it to learn.db for everyone.",
+  "code": [
+   "import sqlite3",
+   "conn = sqlite3.connect(\"learn.db\")",
+   "cursor = conn.cursor()",
+   "cursor.execute(\"INSERT INTO department VALUES (10, 'CSE')\")",
+   "cursor.execute(\"INSERT INTO department VALUES (20, 'ECE')\")",
+   "conn.commit()",
+   "cursor.close()",
+   "conn.close()"
+  ],
+  "steps": [
+   {
+    "line": 0,
+    "before": {
+     "names": {},
+     "heap": {
+      "#1": []
+     },
+     "titles": {
+      "#1": "learn.db on disk: department (what other programs see)"
+     }
+    },
+    "after": {
+     "names": {},
+     "heap": {
+      "#1": []
+     },
+     "titles": {
+      "#1": "learn.db on disk: department (what other programs see)"
+     }
+    },
+    "out": "",
+    "note": "The built-in sqlite3 module is imported. No driver install is needed."
+   },
+   {
+    "line": 1,
+    "before": {
+     "names": {},
+     "heap": {
+      "#1": []
+     },
+     "titles": {
+      "#1": "learn.db on disk: department (what other programs see)"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": []
+     },
+     "titles": {
+      "#1": "learn.db on disk: department (what other programs see)",
+      "#2": "department as seen through conn (includes uncommitted rows)"
+     }
+    },
+    "out": "",
+    "note": "connect() opens learn.db (it creates the file if it is missing). The table is still empty on disk."
+   },
+   {
+    "line": 2,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": []
+     },
+     "titles": {
+      "#1": "learn.db on disk: department (what other programs see)",
+      "#2": "department as seen through conn (includes uncommitted rows)"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": []
+     },
+     "titles": {
+      "#1": "learn.db on disk: department (what other programs see)",
+      "#2": "department as seen through conn (includes uncommitted rows)"
+     }
+    },
+    "out": "",
+    "note": "The cursor is the object that sends SQL through the connection."
+   },
+   {
+    "line": 3,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": []
+     },
+     "titles": {
+      "#1": "learn.db on disk: department (what other programs see)",
+      "#2": "department as seen through conn (includes uncommitted rows)"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "learn.db on disk: department (what other programs see)",
+      "#2": "department as seen through conn (includes uncommitted rows)"
+     }
+    },
+    "out": "",
+    "note": "The row exists for conn but is NOT committed: the file on disk is still empty."
+   },
+   {
+    "line": 4,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "learn.db on disk: department (what other programs see)",
+      "#2": "department as seen through conn (includes uncommitted rows)"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "learn.db on disk: department (what other programs see)",
+      "#2": "department as seen through conn (includes uncommitted rows)"
+     }
+    },
+    "out": "",
+    "note": "A second uncommitted row. Both live in the open transaction."
+   },
+   {
+    "line": 5,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "learn.db on disk: department (what other programs see)",
+      "#2": "department as seen through conn (includes uncommitted rows)"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "learn.db on disk: department (what other programs see)",
+      "#2": "department as seen through conn (includes uncommitted rows)"
+     }
+    },
+    "out": "",
+    "note": "commit() makes the transaction permanent: now the file on disk has both rows."
+   },
+   {
+    "line": 6,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "learn.db on disk: department (what other programs see)",
+      "#2": "department as seen through conn (includes uncommitted rows)"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<closed>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "learn.db on disk: department (what other programs see)",
+      "#2": "department as seen through conn (includes uncommitted rows)"
+     }
+    },
+    "out": "",
+    "note": "Close the cursor first."
+   },
+   {
+    "line": 7,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<closed>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "learn.db on disk: department (what other programs see)",
+      "#2": "department as seen through conn (includes uncommitted rows)"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<closed>"
+      },
+      "cursor": {
+       "v": "<closed>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "learn.db on disk: department (what other programs see)"
+     }
+    },
+    "out": "",
+    "note": "Then close the connection. Always release both when the work is done."
+   }
+  ]
+ },
+ {
+  "id": "fetch",
+  "title": "fetchone / fetchmany / fetchall",
+  "section": "select.py",
+  "blurb": "Rows are consumed as you fetch them: each fetch continues where the last one stopped.",
+  "code": [
+   "import sqlite3",
+   "conn = sqlite3.connect(\"learn.db\")",
+   "cursor = conn.cursor()",
+   "rows = cursor.execute(\"SELECT * FROM department\")",
+   "print(rows.fetchone())",
+   "print(rows.fetchmany(2))",
+   "print(rows.fetchall())",
+   "print(rows.fetchone())"
+  ],
+  "steps": [
+   {
+    "line": 0,
+    "before": {
+     "names": {},
+     "heap": {},
+     "titles": {}
+    },
+    "after": {
+     "names": {},
+     "heap": {},
+     "titles": {}
+    },
+    "out": "",
+    "note": "Import."
+   },
+   {
+    "line": 1,
+    "before": {
+     "names": {},
+     "heap": {},
+     "titles": {}
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      }
+     },
+     "heap": {},
+     "titles": {}
+    },
+    "out": "",
+    "note": "Open learn.db."
+   },
+   {
+    "line": 2,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      }
+     },
+     "heap": {},
+     "titles": {}
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {},
+     "titles": {}
+    },
+    "out": "",
+    "note": "Create the cursor."
+   },
+   {
+    "line": 3,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {},
+     "titles": {}
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      },
+      "rows": {
+       "v": "same object as cursor"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "rows still waiting inside the cursor"
+     }
+    },
+    "out": "",
+    "note": "execute() runs the SELECT and returns the cursor itself, so rows is cursor. Nothing is fetched yet: all 4 rows wait inside it."
+   },
+   {
+    "line": 4,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      },
+      "rows": {
+       "v": "same object as cursor"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "rows still waiting inside the cursor"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      },
+      "rows": {
+       "v": "same object as cursor"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "rows still waiting inside the cursor"
+     }
+    },
+    "out": "(10, 'CSE')\n",
+    "note": "fetchone() returns ONE row as a tuple and moves the cursor forward. 3 rows are left."
+   },
+   {
+    "line": 5,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      },
+      "rows": {
+       "v": "same object as cursor"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "rows still waiting inside the cursor"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      },
+      "rows": {
+       "v": "same object as cursor"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "rows still waiting inside the cursor"
+     }
+    },
+    "out": "[(20, 'ECE'), (30, 'Civil')]\n",
+    "note": "fetchmany(2) returns a list of the next 2 tuples. 1 row is left."
+   },
+   {
+    "line": 6,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      },
+      "rows": {
+       "v": "same object as cursor"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "rows still waiting inside the cursor"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      },
+      "rows": {
+       "v": "same object as cursor"
+      }
+     },
+     "heap": {
+      "#1": []
+     },
+     "titles": {
+      "#1": "rows still waiting inside the cursor"
+     }
+    },
+    "out": "[(40, 'Mech.')]\n",
+    "note": "fetchall() returns a list with everything that is left."
+   },
+   {
+    "line": 7,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      },
+      "rows": {
+       "v": "same object as cursor"
+      }
+     },
+     "heap": {
+      "#1": []
+     },
+     "titles": {
+      "#1": "rows still waiting inside the cursor"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cursor": {
+       "v": "<sqlite3.Cursor>"
+      },
+      "rows": {
+       "v": "same object as cursor"
+      }
+     },
+     "heap": {
+      "#1": []
+     },
+     "titles": {
+      "#1": "rows still waiting inside the cursor"
+     }
+    },
+    "out": "None\n",
+    "note": "The cursor is exhausted: fetchone() returns None (no more rows). Run the query again to re-read."
+   }
+  ]
+ },
+ {
+  "id": "update",
+  "title": "UPDATE, DELETE, rowcount, rollback",
+  "section": "DMLupdateQuery.pdf",
+  "blurb": "The ? placeholders pass values safely. rowcount tells you how many rows a statement changed. rollback() throws away uncommitted work.",
+  "code": [
+   "import sqlite3",
+   "conn = sqlite3.connect(\"univ.db\")",
+   "cur = conn.cursor()",
+   "cur.execute(\"UPDATE department SET name = ? WHERE name = ?\", (\"Chem\", \"Mech.\"))",
+   "print(cur.rowcount)",
+   "cur.execute(\"DELETE FROM department WHERE deptNo = ?\", (40,))",
+   "print(cur.rowcount)",
+   "cur.execute(\"INSERT INTO department VALUES (?, ?)\", (10, \"Again\"))",
+   "conn.rollback()",
+   "conn.close()"
+  ],
+  "steps": [
+   {
+    "line": 0,
+    "before": {
+     "names": {},
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department"
+     }
+    },
+    "after": {
+     "names": {},
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department"
+     }
+    },
+    "out": "",
+    "note": "Import."
+   },
+   {
+    "line": 1,
+    "before": {
+     "names": {},
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department",
+      "#2": "department as seen through conn (uncommitted changes included)"
+     }
+    },
+    "out": "",
+    "note": "Open univ.db."
+   },
+   {
+    "line": 2,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department",
+      "#2": "department as seen through conn (uncommitted changes included)"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cur": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department",
+      "#2": "department as seen through conn (uncommitted changes included)"
+     }
+    },
+    "out": "",
+    "note": "Create the cursor."
+   },
+   {
+    "line": 3,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cur": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department",
+      "#2": "department as seen through conn (uncommitted changes included)"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cur": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Chem')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department",
+      "#2": "department as seen through conn (uncommitted changes included)"
+     }
+    },
+    "out": "",
+    "note": "The Mech. row becomes Chem inside the open transaction. Disk is unchanged until commit."
+   },
+   {
+    "line": 4,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cur": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Chem')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department",
+      "#2": "department as seen through conn (uncommitted changes included)"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cur": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Chem')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department",
+      "#2": "department as seen through conn (uncommitted changes included)"
+     }
+    },
+    "out": "1\n",
+    "note": "rowcount is how many rows the last UPDATE / DELETE / INSERT touched."
+   },
+   {
+    "line": 5,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cur": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Chem')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department",
+      "#2": "department as seen through conn (uncommitted changes included)"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cur": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department",
+      "#2": "department as seen through conn (uncommitted changes included)"
+     }
+    },
+    "out": "",
+    "note": "The deptNo 40 row is removed (still uncommitted)."
+   },
+   {
+    "line": 6,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cur": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department",
+      "#2": "department as seen through conn (uncommitted changes included)"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cur": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department",
+      "#2": "department as seen through conn (uncommitted changes included)"
+     }
+    },
+    "out": "1\n",
+    "note": "Again 1 row affected."
+   },
+   {
+    "line": 7,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cur": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department",
+      "#2": "department as seen through conn (uncommitted changes included)"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cur": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department",
+      "#2": "department as seen through conn (uncommitted changes included)"
+     }
+    },
+    "out": "",
+    "note": "Inserting a deptNo that already exists breaks the PRIMARY KEY rule, so sqlite3 raises IntegrityError.",
+    "error": "IntegrityError: UNIQUE constraint failed: department.deptNo"
+   },
+   {
+    "line": 8,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cur": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department",
+      "#2": "department as seen through conn (uncommitted changes included)"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cur": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department",
+      "#2": "department as seen through conn (uncommitted changes included)"
+     }
+    },
+    "out": "",
+    "note": "rollback() discards everything since the last commit: conn sees the same rows as the disk again."
+   },
+   {
+    "line": 9,
+    "before": {
+     "names": {
+      "conn": {
+       "v": "<sqlite3.Connection>"
+      },
+      "cur": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department",
+      "#2": "department as seen through conn (uncommitted changes included)"
+     }
+    },
+    "after": {
+     "names": {
+      "conn": {
+       "v": "<closed>"
+      },
+      "cur": {
+       "v": "<sqlite3.Cursor>"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "(10, 'CSE')"
+       },
+       {
+        "v": "(20, 'ECE')"
+       },
+       {
+        "v": "(30, 'Civil')"
+       },
+       {
+        "v": "(40, 'Mech.')"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "univ.db on disk: department"
+     }
+    },
+    "out": "",
+    "note": "Close the connection."
+   }
+  ]
+ },
+ {
+  "id": "orm",
+  "title": "SQLAlchemy session: add, commit, query",
+  "section": "sqlalchemy/inserttotables.py",
+  "blurb": "With the ORM you work with objects. The session collects them as pending, and commit() writes the SQL.",
+  "code": [
+   "# setup (earlier): Session = sessionmaker(bind=engine); session = Session()",
+   "d1 = Department(10, \"CSE\")",
+   "s1 = Students(1, \"Smith\", \"NY\", d1)",
+   "session.add_all([d1, s1])",
+   "session.commit()",
+   "result = session.query(Students).all()",
+   "print(result[0])",
+   "session.close()"
+  ],
+  "steps": [
+   {
+    "line": 1,
+    "before": {
+     "names": {},
+     "heap": {
+      "#1": [],
+      "#2": [],
+      "#3": []
+     },
+     "titles": {
+      "#1": "session.new (pending objects, not yet in the database)",
+      "#2": "orm.db on disk: department",
+      "#3": "orm.db on disk: students"
+     }
+    },
+    "after": {
+     "names": {
+      "d1": {
+       "v": "Department CSE"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": [],
+      "#3": []
+     },
+     "titles": {
+      "#1": "session.new (pending objects, not yet in the database)",
+      "#2": "orm.db on disk: department",
+      "#3": "orm.db on disk: students"
+     }
+    },
+    "out": "",
+    "note": "A plain Python object. It is not in the database and not even in the session yet."
+   },
+   {
+    "line": 2,
+    "before": {
+     "names": {
+      "d1": {
+       "v": "Department CSE"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": [],
+      "#3": []
+     },
+     "titles": {
+      "#1": "session.new (pending objects, not yet in the database)",
+      "#2": "orm.db on disk: department",
+      "#3": "orm.db on disk: students"
+     }
+    },
+    "after": {
+     "names": {
+      "d1": {
+       "v": "Department CSE"
+      },
+      "s1": {
+       "v": "Student name: Smith Having rollNumber: 1 residing in NY belongs to 10"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": [],
+      "#3": []
+     },
+     "titles": {
+      "#1": "session.new (pending objects, not yet in the database)",
+      "#2": "orm.db on disk: department",
+      "#3": "orm.db on disk: students"
+     }
+    },
+    "out": "",
+    "note": "A Students object; the constructor copies deptNo from d1 so the foreign key is set."
+   },
+   {
+    "line": 3,
+    "before": {
+     "names": {
+      "d1": {
+       "v": "Department CSE"
+      },
+      "s1": {
+       "v": "Student name: Smith Having rollNumber: 1 residing in NY belongs to 10"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": [],
+      "#3": []
+     },
+     "titles": {
+      "#1": "session.new (pending objects, not yet in the database)",
+      "#2": "orm.db on disk: department",
+      "#3": "orm.db on disk: students"
+     }
+    },
+    "after": {
+     "names": {
+      "d1": {
+       "v": "Department CSE"
+      },
+      "s1": {
+       "v": "Student name: Smith Having rollNumber: 1 residing in NY belongs to 10"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "Department CSE"
+       },
+       {
+        "v": "Student Smith"
+       }
+      ],
+      "#2": [],
+      "#3": []
+     },
+     "titles": {
+      "#1": "session.new (pending objects, not yet in the database)",
+      "#2": "orm.db on disk: department",
+      "#3": "orm.db on disk: students"
+     }
+    },
+    "out": "",
+    "note": "add_all() hands both objects to the session: they are pending in session.new. Still nothing in the database."
+   },
+   {
+    "line": 4,
+    "before": {
+     "names": {
+      "d1": {
+       "v": "Department CSE"
+      },
+      "s1": {
+       "v": "Student name: Smith Having rollNumber: 1 residing in NY belongs to 10"
+      }
+     },
+     "heap": {
+      "#1": [
+       {
+        "v": "Department CSE"
+       },
+       {
+        "v": "Student Smith"
+       }
+      ],
+      "#2": [],
+      "#3": []
+     },
+     "titles": {
+      "#1": "session.new (pending objects, not yet in the database)",
+      "#2": "orm.db on disk: department",
+      "#3": "orm.db on disk: students"
+     }
+    },
+    "after": {
+     "names": {
+      "d1": {
+       "v": "Department CSE"
+      },
+      "s1": {
+       "v": "Student name: Smith Having rollNumber: 1 residing in NY belongs to 10"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       }
+      ],
+      "#3": [
+       {
+        "v": "(1, 'Smith', 'NY', 10)"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "session.new (pending objects, not yet in the database)",
+      "#2": "orm.db on disk: department",
+      "#3": "orm.db on disk: students"
+     }
+    },
+    "out": "",
+    "note": "commit() flushes the INSERT statements (department first, then students) and commits the transaction."
+   },
+   {
+    "line": 5,
+    "before": {
+     "names": {
+      "d1": {
+       "v": "Department CSE"
+      },
+      "s1": {
+       "v": "Student name: Smith Having rollNumber: 1 residing in NY belongs to 10"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       }
+      ],
+      "#3": [
+       {
+        "v": "(1, 'Smith', 'NY', 10)"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "session.new (pending objects, not yet in the database)",
+      "#2": "orm.db on disk: department",
+      "#3": "orm.db on disk: students"
+     }
+    },
+    "after": {
+     "names": {
+      "d1": {
+       "v": "Department CSE"
+      },
+      "s1": {
+       "v": "Student name: Smith Having rollNumber: 1 residing in NY belongs to 10"
+      },
+      "result": {
+       "v": "[1 Students objects]"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       }
+      ],
+      "#3": [
+       {
+        "v": "(1, 'Smith', 'NY', 10)"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "session.new (pending objects, not yet in the database)",
+      "#2": "orm.db on disk: department",
+      "#3": "orm.db on disk: students"
+     }
+    },
+    "out": "",
+    "note": "query(Students).all() runs SELECT and returns Students objects built from the rows."
+   },
+   {
+    "line": 6,
+    "before": {
+     "names": {
+      "d1": {
+       "v": "Department CSE"
+      },
+      "s1": {
+       "v": "Student name: Smith Having rollNumber: 1 residing in NY belongs to 10"
+      },
+      "result": {
+       "v": "[1 Students objects]"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       }
+      ],
+      "#3": [
+       {
+        "v": "(1, 'Smith', 'NY', 10)"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "session.new (pending objects, not yet in the database)",
+      "#2": "orm.db on disk: department",
+      "#3": "orm.db on disk: students"
+     }
+    },
+    "after": {
+     "names": {
+      "d1": {
+       "v": "Department CSE"
+      },
+      "s1": {
+       "v": "Student name: Smith Having rollNumber: 1 residing in NY belongs to 10"
+      },
+      "result": {
+       "v": "[1 Students objects]"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       }
+      ],
+      "#3": [
+       {
+        "v": "(1, 'Smith', 'NY', 10)"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "session.new (pending objects, not yet in the database)",
+      "#2": "orm.db on disk: department",
+      "#3": "orm.db on disk: students"
+     }
+    },
+    "out": "Student name: Smith Having rollNumber: 1 residing in NY belongs to 10\n",
+    "note": "print() uses the __repr__ you wrote in student.py."
+   },
+   {
+    "line": 7,
+    "before": {
+     "names": {
+      "d1": {
+       "v": "Department CSE"
+      },
+      "s1": {
+       "v": "Student name: Smith Having rollNumber: 1 residing in NY belongs to 10"
+      },
+      "result": {
+       "v": "[1 Students objects]"
+      }
+     },
+     "heap": {
+      "#1": [],
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       }
+      ],
+      "#3": [
+       {
+        "v": "(1, 'Smith', 'NY', 10)"
+       }
+      ]
+     },
+     "titles": {
+      "#1": "session.new (pending objects, not yet in the database)",
+      "#2": "orm.db on disk: department",
+      "#3": "orm.db on disk: students"
+     }
+    },
+    "after": {
+     "names": {
+      "d1": {
+       "v": "Department CSE"
+      },
+      "s1": {
+       "v": "Student name: Smith Having rollNumber: 1 residing in NY belongs to 10"
+      },
+      "result": {
+       "v": "[1 Students objects]"
+      }
+     },
+     "heap": {
+      "#2": [
+       {
+        "v": "(10, 'CSE')"
+       }
+      ],
+      "#3": [
+       {
+        "v": "(1, 'Smith', 'NY', 10)"
+       }
+      ]
+     },
+     "titles": {
+      "#2": "orm.db on disk: department",
+      "#3": "orm.db on disk: students"
+     }
+    },
+    "out": "",
+    "note": "Close the session to release its connection."
+   }
+  ]
+ }
+]
