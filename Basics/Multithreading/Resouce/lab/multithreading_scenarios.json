@@ -1,0 +1,1504 @@
+[
+ {
+  "id": "mutex",
+  "title": "Lock (mutex): one thread at a time",
+  "section": "mutex.py",
+  "kind": "lock",
+  "n": 1,
+  "log": "mutex",
+  "blurb": "Two threads call display(). T2 reaches lock.acquire() while T1 holds the lock, so T2 blocks until T1 releases.",
+  "code": [
+   "def display(str1):",
+   "    lock.acquire()",
+   "    for x in str1:",
+   "        print(x)",
+   "    lock.release()"
+  ],
+  "names": {
+   "T1": "T1  display('HELLO WORLD')",
+   "T2": "T2  display('1234567890')"
+  },
+  "keep": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   13,
+   14,
+   15,
+   16,
+   25,
+   26
+  ],
+  "obj": "lock",
+  "threads": [
+   "T1",
+   "T2"
+  ],
+  "steps": [
+   {
+    "i": 0,
+    "t": 0.0,
+    "thread": "T1",
+    "action": "acquire?",
+    "text": "",
+    "line": 1,
+    "note": "T1 calls acquire(). A lock is free (1 left), so it will be granted at once.",
+    "output": "",
+    "inside": [],
+    "blocked": [
+     "T1"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 1
+   },
+   {
+    "i": 1,
+    "t": 0.0,
+    "thread": "T1",
+    "action": "acquired",
+    "text": "",
+    "line": 1,
+    "note": "T1 got the lock. 0 left.",
+    "output": "",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 2,
+    "t": 0.0,
+    "thread": "T1",
+    "action": "print",
+    "text": "H",
+    "line": 3,
+    "note": "T1 prints 'H'. Only the thread(s) holding the lock can be here.",
+    "output": "H",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 3,
+    "t": 0.0,
+    "thread": "T2",
+    "action": "acquire?",
+    "text": "",
+    "line": 1,
+    "note": "T2 calls acquire(). No lock is free (0 left), so T2 BLOCKS here and waits.",
+    "output": "H",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [
+     "T2"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 4,
+    "t": 0.06,
+    "thread": "T1",
+    "action": "print",
+    "text": "E",
+    "line": 3,
+    "note": "T1 prints 'E'. Only the thread(s) holding the lock can be here.",
+    "output": "HE",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [
+     "T2"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 5,
+    "t": 0.11,
+    "thread": "T1",
+    "action": "print",
+    "text": "L",
+    "line": 3,
+    "note": "T1 prints 'L'. Only the thread(s) holding the lock can be here.",
+    "output": "HEL",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [
+     "T2"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 6,
+    "t": 0.16,
+    "thread": "T1",
+    "action": "print",
+    "text": "L",
+    "line": 3,
+    "note": "T1 prints 'L'. Only the thread(s) holding the lock can be here.",
+    "output": "HELL",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [
+     "T2"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 7,
+    "t": 0.21,
+    "thread": "T1",
+    "action": "print",
+    "text": "O",
+    "line": 3,
+    "note": "T1 prints 'O'. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [
+     "T2"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 8,
+    "t": 0.27,
+    "thread": "T1",
+    "action": "print",
+    "text": " ",
+    "line": 3,
+    "note": "T1 prints ' '. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO ",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [
+     "T2"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 9,
+    "t": 0.32,
+    "thread": "T1",
+    "action": "print",
+    "text": "W",
+    "line": 3,
+    "note": "T1 prints 'W'. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO W",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [
+     "T2"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 10,
+    "t": 0.38,
+    "thread": "T1",
+    "action": "print",
+    "text": "O",
+    "line": 3,
+    "note": "T1 prints 'O'. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO WO",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [
+     "T2"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 11,
+    "t": 0.43,
+    "thread": "T1",
+    "action": "print",
+    "text": "R",
+    "line": 3,
+    "note": "T1 prints 'R'. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO WOR",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [
+     "T2"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 12,
+    "t": 0.48,
+    "thread": "T1",
+    "action": "print",
+    "text": "L",
+    "line": 3,
+    "note": "T1 prints 'L'. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO WORL",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [
+     "T2"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 13,
+    "t": 0.54,
+    "thread": "T1",
+    "action": "print",
+    "text": "D",
+    "line": 3,
+    "note": "T1 prints 'D'. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO WORLD",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [
+     "T2"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 14,
+    "t": 0.59,
+    "thread": "T1",
+    "action": "release",
+    "text": "",
+    "line": 4,
+    "note": "T1 calls release(). 1 now free; a blocked thread can now get it.",
+    "output": "HELLO WORLD",
+    "inside": [],
+    "blocked": [
+     "T2"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 1
+   },
+   {
+    "i": 15,
+    "t": 0.59,
+    "thread": "T2",
+    "action": "acquired",
+    "text": "",
+    "line": 1,
+    "note": "T2 got the lock. 0 left.",
+    "output": "HELLO WORLD",
+    "inside": [
+     "T2"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 16,
+    "t": 0.59,
+    "thread": "T2",
+    "action": "print",
+    "text": "1",
+    "line": 3,
+    "note": "T2 prints '1'. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO WORLD1",
+    "inside": [
+     "T2"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 17,
+    "t": 0.64,
+    "thread": "T2",
+    "action": "print",
+    "text": "2",
+    "line": 3,
+    "note": "T2 prints '2'. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO WORLD12",
+    "inside": [
+     "T2"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 18,
+    "t": 0.69,
+    "thread": "T2",
+    "action": "print",
+    "text": "3",
+    "line": 3,
+    "note": "T2 prints '3'. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO WORLD123",
+    "inside": [
+     "T2"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 19,
+    "t": 0.75,
+    "thread": "T2",
+    "action": "print",
+    "text": "4",
+    "line": 3,
+    "note": "T2 prints '4'. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO WORLD1234",
+    "inside": [
+     "T2"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 20,
+    "t": 0.8,
+    "thread": "T2",
+    "action": "print",
+    "text": "5",
+    "line": 3,
+    "note": "T2 prints '5'. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO WORLD12345",
+    "inside": [
+     "T2"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 21,
+    "t": 0.86,
+    "thread": "T2",
+    "action": "print",
+    "text": "6",
+    "line": 3,
+    "note": "T2 prints '6'. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO WORLD123456",
+    "inside": [
+     "T2"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 22,
+    "t": 0.91,
+    "thread": "T2",
+    "action": "print",
+    "text": "7",
+    "line": 3,
+    "note": "T2 prints '7'. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO WORLD1234567",
+    "inside": [
+     "T2"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 23,
+    "t": 0.96,
+    "thread": "T2",
+    "action": "print",
+    "text": "8",
+    "line": 3,
+    "note": "T2 prints '8'. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO WORLD12345678",
+    "inside": [
+     "T2"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 24,
+    "t": 1.02,
+    "thread": "T2",
+    "action": "print",
+    "text": "9",
+    "line": 3,
+    "note": "T2 prints '9'. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO WORLD123456789",
+    "inside": [
+     "T2"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 25,
+    "t": 1.07,
+    "thread": "T2",
+    "action": "print",
+    "text": "0",
+    "line": 3,
+    "note": "T2 prints '0'. Only the thread(s) holding the lock can be here.",
+    "output": "HELLO WORLD1234567890",
+    "inside": [
+     "T2"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 26,
+    "t": 1.12,
+    "thread": "T2",
+    "action": "release",
+    "text": "",
+    "line": 4,
+    "note": "T2 calls release(). 1 now free.",
+    "output": "HELLO WORLD1234567890",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 1
+   }
+  ]
+ },
+ {
+  "id": "semaphore",
+  "title": "Semaphore(2): two threads at a time",
+  "section": "Semaphores.pdf",
+  "kind": "sem",
+  "n": 2,
+  "log": "sem2",
+  "blurb": "Three threads, Semaphore(2): T1 and T2 enter together, T3 waits for a free permit.",
+  "code": [
+   "def display(str1):",
+   "    l.acquire()",
+   "    for x in str1:",
+   "        print(x)",
+   "        sleep(1)",
+   "    l.release()"
+  ],
+  "names": {
+   "T1": "T1  display('AB')",
+   "T2": "T2  display('12')",
+   "T3": "T3  display('xy')"
+  },
+  "keep": [
+   0,
+   1,
+   3,
+   4,
+   6,
+   9,
+   10,
+   12,
+   14
+  ],
+  "obj": "semaphore",
+  "threads": [
+   "T1",
+   "T2",
+   "T3"
+  ],
+  "steps": [
+   {
+    "i": 0,
+    "t": 0.0,
+    "thread": "T1",
+    "action": "acquire?",
+    "text": "",
+    "line": 1,
+    "note": "T1 calls acquire(). A permit is free (2 left), so it will be granted at once.",
+    "output": "",
+    "inside": [],
+    "blocked": [
+     "T1"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 2
+   },
+   {
+    "i": 1,
+    "t": 0.0,
+    "thread": "T1",
+    "action": "acquired",
+    "text": "",
+    "line": 1,
+    "note": "T1 got the permit. 1 left.",
+    "output": "",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 1
+   },
+   {
+    "i": 2,
+    "t": 0.0,
+    "thread": "T1",
+    "action": "print",
+    "text": "A",
+    "line": 3,
+    "note": "T1 prints 'A'. Only the thread(s) holding the permit can be here.",
+    "output": "A",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 1
+   },
+   {
+    "i": 3,
+    "t": 0.0,
+    "thread": "T2",
+    "action": "acquire?",
+    "text": "",
+    "line": 1,
+    "note": "T2 calls acquire(). A permit is free (1 left), so it will be granted at once.",
+    "output": "A",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [
+     "T2"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 1
+   },
+   {
+    "i": 4,
+    "t": 0.0,
+    "thread": "T2",
+    "action": "acquired",
+    "text": "",
+    "line": 1,
+    "note": "T2 got the permit. 0 left.",
+    "output": "A",
+    "inside": [
+     "T1",
+     "T2"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 5,
+    "t": 0.0,
+    "thread": "T2",
+    "action": "print",
+    "text": "1",
+    "line": 3,
+    "note": "T2 prints '1'. Only the thread(s) holding the permit can be here.",
+    "output": "A 1",
+    "inside": [
+     "T1",
+     "T2"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 6,
+    "t": 0.0,
+    "thread": "T3",
+    "action": "acquire?",
+    "text": "",
+    "line": 1,
+    "note": "T3 calls acquire(). No permit is free (0 left), so T3 BLOCKS here and waits.",
+    "output": "A 1",
+    "inside": [
+     "T1",
+     "T2"
+    ],
+    "blocked": [
+     "T3"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 7,
+    "t": 1.01,
+    "thread": "T1",
+    "action": "print",
+    "text": "B",
+    "line": 3,
+    "note": "T1 prints 'B'. Only the thread(s) holding the permit can be here.",
+    "output": "A 1 B",
+    "inside": [
+     "T1",
+     "T2"
+    ],
+    "blocked": [
+     "T3"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 8,
+    "t": 1.01,
+    "thread": "T2",
+    "action": "print",
+    "text": "2",
+    "line": 3,
+    "note": "T2 prints '2'. Only the thread(s) holding the permit can be here.",
+    "output": "A 1 B 2",
+    "inside": [
+     "T1",
+     "T2"
+    ],
+    "blocked": [
+     "T3"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 9,
+    "t": 2.01,
+    "thread": "T2",
+    "action": "release",
+    "text": "",
+    "line": 5,
+    "note": "T2 calls release(). 1 now free; a blocked thread can now get it.",
+    "output": "A 1 B 2",
+    "inside": [
+     "T1"
+    ],
+    "blocked": [
+     "T3"
+    ],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 1
+   },
+   {
+    "i": 10,
+    "t": 2.01,
+    "thread": "T3",
+    "action": "acquired",
+    "text": "",
+    "line": 1,
+    "note": "T3 got the permit. 0 left.",
+    "output": "A 1 B 2",
+    "inside": [
+     "T1",
+     "T3"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 11,
+    "t": 2.01,
+    "thread": "T3",
+    "action": "print",
+    "text": "x",
+    "line": 3,
+    "note": "T3 prints 'x'. Only the thread(s) holding the permit can be here.",
+    "output": "A 1 B 2 x",
+    "inside": [
+     "T1",
+     "T3"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 0
+   },
+   {
+    "i": 12,
+    "t": 2.01,
+    "thread": "T1",
+    "action": "release",
+    "text": "",
+    "line": 5,
+    "note": "T1 calls release(). 1 now free.",
+    "output": "A 1 B 2 x",
+    "inside": [
+     "T3"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 1
+   },
+   {
+    "i": 13,
+    "t": 3.02,
+    "thread": "T3",
+    "action": "print",
+    "text": "y",
+    "line": 3,
+    "note": "T3 prints 'y'. Only the thread(s) holding the permit can be here.",
+    "output": "A 1 B 2 x y",
+    "inside": [
+     "T3"
+    ],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 1
+   },
+   {
+    "i": 14,
+    "t": 4.02,
+    "thread": "T3",
+    "action": "release",
+    "text": "",
+    "line": 5,
+    "note": "T3 calls release(). 2 now free.",
+    "output": "A 1 B 2 x y",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": 2
+   }
+  ]
+ },
+ {
+  "id": "condition",
+  "title": "Condition: producer and consumer take turns",
+  "section": "synchronousUsingCondition.py",
+  "kind": "cond",
+  "n": 1,
+  "log": "cond",
+  "blurb": "Producer calls put(), consumer calls get(). wait() pauses a thread, notify() wakes a thread that is already waiting.",
+  "code": [
+   "def put(self, data):          # producer thread",
+   "    self.cv.acquire()",
+   "    self.cv.wait(timeout=0)",
+   "    self.data = data",
+   "    print(f'produced {self.data}')",
+   "    self.cv.notify()",
+   "    self.cv.release()",
+   "    sleep(1)",
+   "def get(self):                # consumer thread",
+   "    self.cv.acquire()",
+   "    self.cv.wait()",
+   "    x = self.data",
+   "    print(f'Consumed {x}')",
+   "    self.cv.notify()",
+   "    self.cv.release()",
+   "    sleep(1)"
+  ],
+  "names": {
+   "T1": "T1  producer: put()",
+   "T2": "T2  consumer: get()"
+  },
+  "keep": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   9,
+   10,
+   12,
+   13,
+   14
+  ],
+  "obj": "condition",
+  "threads": [
+   "T1",
+   "T2"
+  ],
+  "steps": [
+   {
+    "i": 0,
+    "t": 0.0,
+    "thread": "T1",
+    "action": "acquired",
+    "text": "",
+    "line": 1,
+    "note": "T1 acquires the condition lock (cv.acquire()).",
+    "output": "",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T1",
+    "free": null
+   },
+   {
+    "i": 1,
+    "t": 0.0,
+    "thread": "T1",
+    "action": "wait(timeout=0)",
+    "text": "",
+    "line": 2,
+    "note": "T1 calls wait(timeout=0): it returns immediately, so it does not really pause.",
+    "output": "",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T1",
+    "free": null
+   },
+   {
+    "i": 2,
+    "t": 0.0,
+    "thread": "T1",
+    "action": "print",
+    "text": "produced 1",
+    "line": 4,
+    "note": "T1 prints 'produced 1'.",
+    "output": "produced 1",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T1",
+    "free": null
+   },
+   {
+    "i": 3,
+    "t": 0.0,
+    "thread": "T1",
+    "action": "notify",
+    "text": "",
+    "line": 5,
+    "note": "T1 calls notify(), but nobody is waiting, so this notification is LOST.",
+    "output": "produced 1",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T1",
+    "free": null
+   },
+   {
+    "i": 4,
+    "t": 0.0,
+    "thread": "T1",
+    "action": "release",
+    "text": "",
+    "line": 6,
+    "note": "T1 releases the condition lock.",
+    "output": "produced 1",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": null
+   },
+   {
+    "i": 5,
+    "t": 0.0,
+    "thread": "T2",
+    "action": "acquired",
+    "text": "",
+    "line": 9,
+    "note": "T2 acquires the condition lock (cv.acquire()).",
+    "output": "produced 1",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T2",
+    "free": null
+   },
+   {
+    "i": 6,
+    "t": 0.0,
+    "thread": "T2",
+    "action": "wait",
+    "text": "",
+    "line": 10,
+    "note": "T2 calls wait(): it releases the lock and sleeps until someone calls notify().",
+    "output": "produced 1",
+    "inside": [],
+    "blocked": [],
+    "waiting": [
+     "T2"
+    ],
+    "notified": [],
+    "holder": null,
+    "free": null
+   },
+   {
+    "i": 7,
+    "t": 1.01,
+    "thread": "T1",
+    "action": "acquired",
+    "text": "",
+    "line": 1,
+    "note": "T1 acquires the condition lock (cv.acquire()).",
+    "output": "produced 1",
+    "inside": [],
+    "blocked": [],
+    "waiting": [
+     "T2"
+    ],
+    "notified": [],
+    "holder": "T1",
+    "free": null
+   },
+   {
+    "i": 8,
+    "t": 1.01,
+    "thread": "T1",
+    "action": "wait(timeout=0)",
+    "text": "",
+    "line": 2,
+    "note": "T1 calls wait(timeout=0): it returns immediately, so it does not really pause.",
+    "output": "produced 1",
+    "inside": [],
+    "blocked": [],
+    "waiting": [
+     "T2"
+    ],
+    "notified": [],
+    "holder": "T1",
+    "free": null
+   },
+   {
+    "i": 9,
+    "t": 1.01,
+    "thread": "T1",
+    "action": "print",
+    "text": "produced 2",
+    "line": 4,
+    "note": "T1 prints 'produced 2'.",
+    "output": "produced 1\nproduced 2",
+    "inside": [],
+    "blocked": [],
+    "waiting": [
+     "T2"
+    ],
+    "notified": [],
+    "holder": "T1",
+    "free": null
+   },
+   {
+    "i": 10,
+    "t": 1.01,
+    "thread": "T1",
+    "action": "notify",
+    "text": "",
+    "line": 5,
+    "note": "T1 calls notify(): T2 is waiting, so it is woken (it still needs the lock back).",
+    "output": "produced 1\nproduced 2",
+    "inside": [],
+    "blocked": [],
+    "waiting": [
+     "T2"
+    ],
+    "notified": [
+     "T2"
+    ],
+    "holder": "T1",
+    "free": null
+   },
+   {
+    "i": 11,
+    "t": 1.01,
+    "thread": "T1",
+    "action": "release",
+    "text": "",
+    "line": 6,
+    "note": "T1 releases the condition lock.",
+    "output": "produced 1\nproduced 2",
+    "inside": [],
+    "blocked": [],
+    "waiting": [
+     "T2"
+    ],
+    "notified": [
+     "T2"
+    ],
+    "holder": null,
+    "free": null
+   },
+   {
+    "i": 12,
+    "t": 1.01,
+    "thread": "T2",
+    "action": "woken",
+    "text": "",
+    "line": 10,
+    "note": "T2 wakes up from wait() and holds the lock again.",
+    "output": "produced 1\nproduced 2",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T2",
+    "free": null
+   },
+   {
+    "i": 13,
+    "t": 1.01,
+    "thread": "T2",
+    "action": "print",
+    "text": "Consumed 2",
+    "line": 12,
+    "note": "T2 prints 'Consumed 2'.",
+    "output": "produced 1\nproduced 2\nConsumed 2",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T2",
+    "free": null
+   },
+   {
+    "i": 14,
+    "t": 1.01,
+    "thread": "T2",
+    "action": "notify",
+    "text": "",
+    "line": 13,
+    "note": "T2 calls notify(), but nobody is waiting, so this notification is LOST.",
+    "output": "produced 1\nproduced 2\nConsumed 2",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T2",
+    "free": null
+   },
+   {
+    "i": 15,
+    "t": 1.01,
+    "thread": "T2",
+    "action": "release",
+    "text": "",
+    "line": 14,
+    "note": "T2 releases the condition lock.",
+    "output": "produced 1\nproduced 2\nConsumed 2",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": null
+   },
+   {
+    "i": 16,
+    "t": 2.01,
+    "thread": "T2",
+    "action": "acquired",
+    "text": "",
+    "line": 9,
+    "note": "T2 acquires the condition lock (cv.acquire()).",
+    "output": "produced 1\nproduced 2\nConsumed 2",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T2",
+    "free": null
+   },
+   {
+    "i": 17,
+    "t": 2.01,
+    "thread": "T2",
+    "action": "wait",
+    "text": "",
+    "line": 10,
+    "note": "T2 calls wait(): it releases the lock and sleeps until someone calls notify().",
+    "output": "produced 1\nproduced 2\nConsumed 2",
+    "inside": [],
+    "blocked": [],
+    "waiting": [
+     "T2"
+    ],
+    "notified": [],
+    "holder": null,
+    "free": null
+   },
+   {
+    "i": 18,
+    "t": 2.01,
+    "thread": "T1",
+    "action": "acquired",
+    "text": "",
+    "line": 1,
+    "note": "T1 acquires the condition lock (cv.acquire()).",
+    "output": "produced 1\nproduced 2\nConsumed 2",
+    "inside": [],
+    "blocked": [],
+    "waiting": [
+     "T2"
+    ],
+    "notified": [],
+    "holder": "T1",
+    "free": null
+   },
+   {
+    "i": 19,
+    "t": 2.01,
+    "thread": "T1",
+    "action": "wait(timeout=0)",
+    "text": "",
+    "line": 2,
+    "note": "T1 calls wait(timeout=0): it returns immediately, so it does not really pause.",
+    "output": "produced 1\nproduced 2\nConsumed 2",
+    "inside": [],
+    "blocked": [],
+    "waiting": [
+     "T2"
+    ],
+    "notified": [],
+    "holder": "T1",
+    "free": null
+   },
+   {
+    "i": 20,
+    "t": 2.01,
+    "thread": "T1",
+    "action": "print",
+    "text": "produced 3",
+    "line": 4,
+    "note": "T1 prints 'produced 3'.",
+    "output": "produced 1\nproduced 2\nConsumed 2\nproduced 3",
+    "inside": [],
+    "blocked": [],
+    "waiting": [
+     "T2"
+    ],
+    "notified": [],
+    "holder": "T1",
+    "free": null
+   },
+   {
+    "i": 21,
+    "t": 2.01,
+    "thread": "T1",
+    "action": "notify",
+    "text": "",
+    "line": 5,
+    "note": "T1 calls notify(): T2 is waiting, so it is woken (it still needs the lock back).",
+    "output": "produced 1\nproduced 2\nConsumed 2\nproduced 3",
+    "inside": [],
+    "blocked": [],
+    "waiting": [
+     "T2"
+    ],
+    "notified": [
+     "T2"
+    ],
+    "holder": "T1",
+    "free": null
+   },
+   {
+    "i": 22,
+    "t": 2.01,
+    "thread": "T1",
+    "action": "release",
+    "text": "",
+    "line": 6,
+    "note": "T1 releases the condition lock.",
+    "output": "produced 1\nproduced 2\nConsumed 2\nproduced 3",
+    "inside": [],
+    "blocked": [],
+    "waiting": [
+     "T2"
+    ],
+    "notified": [
+     "T2"
+    ],
+    "holder": null,
+    "free": null
+   },
+   {
+    "i": 23,
+    "t": 2.01,
+    "thread": "T2",
+    "action": "woken",
+    "text": "",
+    "line": 10,
+    "note": "T2 wakes up from wait() and holds the lock again.",
+    "output": "produced 1\nproduced 2\nConsumed 2\nproduced 3",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T2",
+    "free": null
+   },
+   {
+    "i": 24,
+    "t": 2.01,
+    "thread": "T2",
+    "action": "print",
+    "text": "Consumed 3",
+    "line": 12,
+    "note": "T2 prints 'Consumed 3'.",
+    "output": "produced 1\nproduced 2\nConsumed 2\nproduced 3\nConsumed 3",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T2",
+    "free": null
+   },
+   {
+    "i": 25,
+    "t": 2.01,
+    "thread": "T2",
+    "action": "notify",
+    "text": "",
+    "line": 13,
+    "note": "T2 calls notify(), but nobody is waiting, so this notification is LOST.",
+    "output": "produced 1\nproduced 2\nConsumed 2\nproduced 3\nConsumed 3",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T2",
+    "free": null
+   },
+   {
+    "i": 26,
+    "t": 2.01,
+    "thread": "T2",
+    "action": "release",
+    "text": "",
+    "line": 14,
+    "note": "T2 releases the condition lock.",
+    "output": "produced 1\nproduced 2\nConsumed 2\nproduced 3\nConsumed 3",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": null
+   },
+   {
+    "i": 27,
+    "t": 3.02,
+    "thread": "T1",
+    "action": "acquired",
+    "text": "",
+    "line": 1,
+    "note": "T1 acquires the condition lock (cv.acquire()).",
+    "output": "produced 1\nproduced 2\nConsumed 2\nproduced 3\nConsumed 3",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T1",
+    "free": null
+   },
+   {
+    "i": 28,
+    "t": 3.02,
+    "thread": "T1",
+    "action": "wait(timeout=0)",
+    "text": "",
+    "line": 2,
+    "note": "T1 calls wait(timeout=0): it returns immediately, so it does not really pause.",
+    "output": "produced 1\nproduced 2\nConsumed 2\nproduced 3\nConsumed 3",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T1",
+    "free": null
+   },
+   {
+    "i": 29,
+    "t": 3.02,
+    "thread": "T1",
+    "action": "print",
+    "text": "produced 4",
+    "line": 4,
+    "note": "T1 prints 'produced 4'.",
+    "output": "produced 1\nproduced 2\nConsumed 2\nproduced 3\nConsumed 3\nproduced 4",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T1",
+    "free": null
+   },
+   {
+    "i": 30,
+    "t": 3.02,
+    "thread": "T1",
+    "action": "notify",
+    "text": "",
+    "line": 5,
+    "note": "T1 calls notify(), but nobody is waiting, so this notification is LOST.",
+    "output": "produced 1\nproduced 2\nConsumed 2\nproduced 3\nConsumed 3\nproduced 4",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T1",
+    "free": null
+   },
+   {
+    "i": 31,
+    "t": 3.02,
+    "thread": "T1",
+    "action": "release",
+    "text": "",
+    "line": 6,
+    "note": "T1 releases the condition lock.",
+    "output": "produced 1\nproduced 2\nConsumed 2\nproduced 3\nConsumed 3\nproduced 4",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": null,
+    "free": null
+   },
+   {
+    "i": 32,
+    "t": 3.02,
+    "thread": "T2",
+    "action": "acquired",
+    "text": "",
+    "line": 9,
+    "note": "T2 acquires the condition lock (cv.acquire()).",
+    "output": "produced 1\nproduced 2\nConsumed 2\nproduced 3\nConsumed 3\nproduced 4",
+    "inside": [],
+    "blocked": [],
+    "waiting": [],
+    "notified": [],
+    "holder": "T2",
+    "free": null
+   },
+   {
+    "i": 33,
+    "t": 3.02,
+    "thread": "T2",
+    "action": "wait",
+    "text": "",
+    "line": 10,
+    "note": "T2 calls wait(): it releases the lock and sleeps until someone calls notify().",
+    "output": "produced 1\nproduced 2\nConsumed 2\nproduced 3\nConsumed 3\nproduced 4",
+    "inside": [],
+    "blocked": [],
+    "waiting": [
+     "T2"
+    ],
+    "notified": [],
+    "holder": null,
+    "free": null
+   }
+  ]
+ }
+]
