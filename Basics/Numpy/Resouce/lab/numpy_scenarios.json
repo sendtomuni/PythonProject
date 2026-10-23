@@ -1,0 +1,203 @@
+[
+ {
+  "id": "create",
+  "title": "Creating arrays",
+  "section": "Array Creation",
+  "blurb": "np.array turns lists and tuples into ndarrays; nested brackets add dimensions, ndmin forces extra ones, and ragged rows are rejected.",
+  "code": [
+   "import numpy as np",
+   "ar1 = np.array((1, 2, 3, 4, 5))",
+   "ar2 = np.array([[1, 2, 3, 4], [5, 6, 7, 8]])",
+   "ar3 = np.array((1, 2, 3, 4, 5), ndmin=3)",
+   "ar3_1 = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])",
+   "ar_error = np.array([[1, 2, 3, 4], [5, 6, 7, 8, 9]])"
+  ],
+  "notes": {
+   "0": "numpy is imported once under the usual alias np.",
+   "1": "A tuple works just like a list: a 1-D array with 5 elements, shape (5,).",
+   "2": "Two inner lists of equal length become a 2-D array: 2 rows x 4 columns, shape (2, 4).",
+   "3": "ndmin=3 wraps the data in extra brackets until the array has 3 dimensions: shape (1, 1, 5).",
+   "4": "Three levels of brackets = 3-D array, shape (2, 2, 2): 2 blocks, each 2 rows x 2 columns.",
+   "5": "The rows have different lengths (4 and 5), so NumPy cannot build a rectangular array and raises ValueError."
+  }
+ },
+ {
+  "id": "attrs",
+  "title": "Array attributes",
+  "section": "Array Creation",
+  "blurb": "ndim, shape, size, dtype, itemsize and nbytes describe an array without changing it.",
+  "code": [
+   "import numpy as np",
+   "ar = np.array([[1, 2, 3, 4], [5, 6, 7, 8]])",
+   "ar.ndim",
+   "ar.shape",
+   "ar.size",
+   "ar.dtype",
+   "ar.itemsize",
+   "ar.nbytes",
+   "np.array([1.1, 2.2, 3.3]).dtype"
+  ],
+  "notes": {
+   "2": "ndim = number of dimensions (axes).",
+   "3": "shape = (rows, columns) as a tuple.",
+   "4": "size = total number of elements = 2 x 4.",
+   "5": "dtype = type of every element. Integers default to int64 on 64-bit macOS/Linux (the PDF shows int32, which is the Windows / older-NumPy default).",
+   "6": "itemsize = bytes used by ONE element (int64 -> 8).",
+   "7": "nbytes = size x itemsize = 8 x 8 = 64 bytes.",
+   "8": "Any float in the data makes the whole array float64."
+  }
+ },
+ {
+  "id": "builders",
+  "title": "Built-in array builders",
+  "section": "Creating an Array",
+  "blurb": "zeros, ones, eye, diag, arange and linspace build arrays without typing every value.",
+  "code": [
+   "import numpy as np",
+   "ar_zero = np.zeros(5)",
+   "ar_one = np.ones((3, 4))",
+   "ar_eye = np.eye(3)",
+   "ar_diag = np.diag([2, 3, 4, 5])",
+   "ar_range = np.arange(0, 10, 2)",
+   "ar_linspace = np.linspace(1, 6, 5)",
+   "ar_linspace2 = np.linspace(0, 10, num=5)"
+  ],
+  "notes": {
+   "1": "np.zeros(5): five 0.0 values. The default dtype is float64.",
+   "2": "np.ones((3, 4)): pass the shape as a tuple - 3 rows x 4 columns of 1.0.",
+   "3": "np.eye(3): identity matrix - 1 on the diagonal, 0 elsewhere. Only one size argument is needed.",
+   "4": "np.diag([2, 3, 4, 5]): puts the list on the diagonal of a 4x4 matrix; ints stay ints.",
+   "5": "np.arange(start, stop, step) works like range(): stop (10) is excluded.",
+   "6": "np.linspace(1, 6, 5): 5 evenly spaced numbers from 1 to 6 - stop IS included.",
+   "7": "num=5 spaces five values from 0 to 10: step = (10-0)/(5-1) = 2.5."
+  }
+ },
+ {
+  "id": "dtypes",
+  "title": "Choosing a dtype",
+  "section": "Numpy DataType",
+  "blurb": "The second argument of np.array sets the type code: b, B, i, I, f, F, ? and the text types S, U, O.",
+  "code": [
+   "import numpy as np",
+   "a_b = np.array([1, 2, 3, 4], 'b')",
+   "a_B = np.array([1, 2, 3, 4], 'B')",
+   "a_i = np.array([1, 2, 3, 4], 'i')",
+   "a_I = np.array([1, 2, 3, 4], 'I')",
+   "a_f = np.array([1, 2, 3, 4], 'f')",
+   "a_F = np.array([1, 2, 3, 4], 'F')",
+   "a_q = np.array([1, 2, 3, 4], '?')",
+   "a_S = np.array([1, 2, 3, 4], 'S')",
+   "a_U = np.array([1, 2, 3, 4], 'U')",
+   "a_O = np.array([1, 2, 3, 4], 'O')",
+   "a_big = np.array([1, 2, 3, 129], 'b')"
+  ],
+  "notes": {
+   "1": "'b' = signed byte -> int8 (1 byte per element).",
+   "2": "'B' = unsigned byte -> uint8 (0..255).",
+   "3": "'i' = signed integer -> int32.",
+   "4": "'I' = unsigned integer -> uint32.",
+   "5": "'f' = float -> float32 (note the dtype shown in the repr).",
+   "6": "'F' = complex float -> complex64: 1+0j, 2+0j ...",
+   "7": "'?' = boolean: every non-zero number becomes True.",
+   "8": "'S' = byte string (|S1): each number becomes b'1', b'2' ...",
+   "9": "'U' = unicode string (<U1): each number becomes '1', '2' ...",
+   "10": "'O' = Python object: elements stay ordinary Python ints.",
+   "11": "129 does not fit in int8 (-128..127). The PDF shows it wrapping to -127; NumPy 2.x refuses with OverflowError instead."
+  }
+ },
+ {
+  "id": "index",
+  "title": "Indexing and slicing",
+  "section": "Practice notebook",
+  "blurb": "Integer indexes pick elements, slices cut ranges; a slice keeps dimensions, an integer drops one.",
+  "code": [
+   "import numpy as np",
+   "ar1 = np.array((1, 2, 3, 4, 5))",
+   "ar2 = np.array([[1, 2, 3, 4], [5, 6, 7, 8]])",
+   "ar3_1 = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])",
+   "ar3_1[1, 1, 1]",
+   "ar3_1[1][1][1]",
+   "ar1[1:4:2]",
+   "ar2[1]",
+   "ar2[1:2:1]",
+   "ar2[0:2:1]",
+   "ar2[0:1, 0:2]"
+  ],
+  "notes": {
+   "4": "[block, row, column] = [1, 1, 1] -> the last element, 8.",
+   "5": "Chained indexing gives the same value but builds temporary arrays; ar3_1[1, 1, 1] is the better style.",
+   "6": "Slice start:stop:step -> indexes 1 and 3: [2 4].",
+   "7": "An integer index on the first axis drops that dimension: 1-D row [5 6 7 8].",
+   "8": "A slice 1:2 keeps the dimension: still 2-D, shape (1, 4).",
+   "9": "0:2:1 selects both rows: the whole 2-D array.",
+   "10": "Rows 0:1 and columns 0:2 -> the 1x2 block [[1 2]]."
+  }
+ },
+ {
+  "id": "reshape",
+  "title": "reshape and flatten",
+  "section": "Numpy Reshape",
+  "blurb": "reshape gives a new shape (without assignment the change is temporary); flatten always returns a 1-D copy.",
+  "code": [
+   "import numpy as np",
+   "arr = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])",
+   "arr.shape",
+   "arr.reshape(4, 3)",
+   "arr.shape",
+   "arr2 = arr.reshape(3, 2, 2)",
+   "arr.flatten()",
+   "arr.reshape(5, 3)"
+  ],
+  "notes": {
+   "2": "The array is 1-D with 12 elements: shape (12,).",
+   "3": "reshape(4, 3) returns a 4x3 array but nothing stores it - this change is temporary.",
+   "4": "arr itself is untouched: still (12,).",
+   "5": "Assign the result to keep it - this change is permanent. 3 x 2 x 2 = 12 elements.",
+   "6": "flatten() turns any array into a new 1-D array.",
+   "7": "5 x 3 = 15 is not 12 - the total number of elements must stay the same."
+  }
+ },
+ {
+  "id": "resize",
+  "title": "resize and transpose",
+  "section": "Practice notebook",
+  "blurb": "resize changes the array itself (in place); transpose swaps axes and does nothing on a 1-D array.",
+  "code": [
+   "import numpy as np",
+   "arr = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])",
+   "arr.resize(11, refcheck=False)",
+   "arr.transpose()",
+   "arr.resize(12, refcheck=False)",
+   "arr3 = arr.reshape(3, 4)",
+   "arr3.transpose()"
+  ],
+  "notes": {
+   "2": "resize(11) works IN PLACE: arr is cut to 11 elements (the 12 is dropped).",
+   "3": "transpose() of a 1-D array does nothing - there is no second axis to swap.",
+   "4": "resize(12) grows it back; the new slot is filled with 0.",
+   "5": "3 x 4 = 12, so reshape(3, 4) is allowed.",
+   "6": "transpose() swaps rows and columns: (3, 4) becomes (4, 3)."
+  }
+ },
+ {
+  "id": "view",
+  "title": "View or copy?",
+  "section": "Numpy Reshape (extra)",
+  "blurb": "reshape returns a view that shares memory with the original; flatten returns an independent copy.",
+  "code": [
+   "import numpy as np",
+   "a = np.arange(6)",
+   "b = a.reshape(2, 3)",
+   "b[0, 0] = 99",
+   "c = a.flatten()",
+   "c[1] = -1"
+  ],
+  "notes": {
+   "1": "arange(6) gives [0 1 2 3 4 5].",
+   "2": "b is a 2x3 VIEW: it reads the same memory as a (see the shares-memory marker).",
+   "3": "Writing through the view changes a as well - same memory.",
+   "4": "flatten() copies the data: c is independent.",
+   "5": "Changing c leaves a and b alone."
+  }
+ }
+]
