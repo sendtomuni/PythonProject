@@ -1,0 +1,223 @@
+[
+ {
+  "id": "create",
+  "title": "Create, compare, subtract",
+  "section": "Create objects",
+  "blurb": "datetime, date and time objects: build them, compare them, subtract them. Subtracting two time objects fails.",
+  "code": [
+   "import datetime",
+   "dt1 = datetime.datetime(2010, 1, 1, 10, 10, 10)",
+   "dt2 = datetime.datetime(day=1, month=1, year=2011, hour=10, minute=10, second=10)",
+   "print(dt2 - dt1)",
+   "print(dt2 > dt1)",
+   "print(dt2 < dt1)",
+   "dat1 = datetime.date(2015, 1, 1)",
+   "dat2 = datetime.date(2016, 1, 1)",
+   "print(dat2 - dat1)",
+   "tim1 = datetime.time(10, 10, 10)",
+   "tim2 = datetime.time(11, 11, 11)",
+   "print(tim2 > tim1)",
+   "print(tim2 - tim1)"
+  ],
+  "notes": {
+   "2": "datetime(year, month, day, hour, minute, second): year, month and day are required, the rest default to 0.",
+   "3": "Keyword arguments can be given in any order.",
+   "4": "datetime minus datetime gives a timedelta (2010 to 2011 has no leap day, so 365 days).",
+   "5": "Comparison operators work on datetime objects and return a bool.",
+   "6": "dt2 is later than dt1, so < is False.",
+   "7": "A date object keeps only year, month and day.",
+   "8": "Another date, one year later.",
+   "9": "date minus date also gives a timedelta (2015 is not a leap year).",
+   "10": "A time object keeps only hour, minute and second.",
+   "11": "A second time object.",
+   "12": "Comparing two time objects works.",
+   "13": "Subtracting two time objects is not allowed: there is no date to measure a duration against."
+  }
+ },
+ {
+  "id": "timedelta",
+  "title": "timedelta arithmetic",
+  "section": "timedelta",
+  "blurb": "Subtract two datetimes to get a timedelta, split it with divmod, and add it back to a datetime.",
+  "code": [
+   "from datetime import *",
+   "dt1 = datetime(2010, 10, 1, 10, 20, 30)",
+   "dt2 = datetime(2011, 10, 1, 10, 20, 30)",
+   "td = dt2 - dt1",
+   "print(divmod(td.days, 30))",
+   "print(divmod(td.days, 7))",
+   "td1 = timedelta(31)",
+   "dt3 = datetime(2022, 3, 16, 16, 34, 2)",
+   "print(dt3 + td1)",
+   "print(dt3 + td)"
+  ],
+  "notes": {
+   "2": "from datetime import * brings datetime, date, time, timedelta straight into the namespace.",
+   "3": "The same moment, one year later.",
+   "4": "td is a timedelta: it stores days, seconds and microseconds (here 365 days).",
+   "5": "divmod(365, 30) = 12 whole months of 30 days and 5 days left over.",
+   "6": "divmod(365, 7) = 52 whole weeks and 1 day left over.",
+   "7": "timedelta(31) means 31 days (days is the first parameter).",
+   "8": "A normal datetime to add to.",
+   "9": "datetime + timedelta gives a new datetime, 31 days later.",
+   "10": "Adding the 365 day timedelta moves the date one year ahead."
+  }
+ },
+ {
+  "id": "format",
+  "title": "strftime and strptime",
+  "section": "Formatting",
+  "blurb": "strftime turns a datetime into text, strptime turns text into a datetime. Both use the same control characters.",
+  "code": [
+   "from datetime import datetime",
+   "dt1 = datetime(2010, 1, 1, 10, 20, 30)",
+   "print(dt1.strftime('%d %B, %A %Y. %H:%M:%S'))",
+   "print(dt1.strftime('%-d %b, %a %y. %H:%M:%S'))",
+   "str1 = '10 Jan 2015, 10:15:30'",
+   "dt2 = datetime.strptime(str1, '%d %b %Y, %H:%M:%S')",
+   "print(dt2)"
+  ],
+  "notes": {
+   "2": "A datetime object (a Friday).",
+   "3": "%d zero-padded day, %B month name, %A day name, %Y 4-digit year, %H %M %S hours, minutes, seconds.",
+   "4": "%-d (no zero), %b short month, %a short day, %y 2-digit year. The minus flag works on Linux and macOS, not on Windows.",
+   "5": "A plain str: it knows nothing about dates yet.",
+   "6": "strptime reads the text using the same control characters and builds a datetime. The format must match the text exactly.",
+   "7": "print shows the datetime in ISO style."
+  }
+ },
+ {
+  "id": "timemod",
+  "title": "time module: epoch and struct_time",
+  "section": "time module",
+  "blurb": "Seconds since 1 Jan 1970 (the epoch) can be turned into a struct_time and back into text.",
+  "code": [
+   "import time",
+   "epoch = time.gmtime(0)",
+   "t = 1647342625.926307",
+   "lt = time.gmtime(t)",
+   "print(lt.tm_year)",
+   "print(lt.tm_mday)",
+   "print(lt.tm_hour)",
+   "print(time.strftime('%d-%m-%Y %H:%M:%S', lt))"
+  ],
+  "notes": {
+   "2": "Second 0 of the epoch is 1 Jan 1970, 00:00:00 UTC (a Thursday: tm_wday 3, Monday is 0).",
+   "3": "time.time() returns a float like this: seconds elapsed since the epoch.",
+   "4": "gmtime gives UTC fields, localtime gives your own time zone. Both return a struct_time.",
+   "5": "A struct_time is a named tuple: read a part by name.",
+   "6": "tm_mday is the day of the month.",
+   "7": "tm_hour is the hour on a 24 hour clock (UTC here).",
+   "8": "time.strftime formats a struct_time with the same control characters."
+  }
+ },
+ {
+  "id": "calendar",
+  "title": "calendar functions",
+  "section": "calendar module",
+  "blurb": "Leap years, weekdays and month lengths from the calendar module.",
+  "code": [
+   "import calendar",
+   "print(calendar.isleap(2024))",
+   "print(calendar.leapdays(2000, 2022))",
+   "print(calendar.weekday(2000, 1, 1))",
+   "print(calendar.weekday(2022, 3, 16))",
+   "print(calendar.monthrange(2022, 3))",
+   "print(calendar.month_name[3])",
+   "print(calendar.day_name[2])"
+  ],
+  "notes": {
+   "2": "2024 is divisible by 4 and not a century year, so it is a leap year.",
+   "3": "Leap years from 2000 up to but not including 2022: 2000, 2004, 2008, 2012, 2016, 2020 = 6.",
+   "4": "weekday returns 0 for Monday ... 6 for Sunday. 1 Jan 2000 was a Saturday = 5.",
+   "5": "16 Mar 2022 was a Wednesday = 2.",
+   "6": "monthrange gives (weekday of the 1st, number of days). 1 Mar 2022 was a Tuesday (shown as calendar.TUESDAY, which equals 1), and the month has 31 days.",
+   "7": "month_name is indexed 1 to 12 (index 0 is an empty string).",
+   "8": "day_name is indexed 0 (Monday) to 6 (Sunday)."
+  }
+ },
+ {
+  "id": "dateToObject",
+  "title": "Program: dateToObject.py",
+  "section": "Practice",
+  "blurb": "Practice program: convert the text 05-01-1994 into a datetime object.",
+  "code": [
+   "import datetime",
+   "dateString = '05-01-1994'",
+   "dt = datetime.datetime.strptime(dateString, '%d-%m-%Y')",
+   "print(dt)"
+  ],
+  "notes": {
+   "2": "Day first, then month, then year, separated by dashes.",
+   "3": "The format %d-%m-%Y mirrors the text, so the parse works: 5 January 1994.",
+   "4": "str(datetime) prints year-month-day then the time (midnight when no time was given)."
+  }
+ },
+ {
+  "id": "calculateAge",
+  "title": "Program: calculateAge.py",
+  "section": "Practice",
+  "blurb": "Practice program with today fixed at 22 Oct 2026 so the result is the same on every run.",
+  "code": [
+   "import datetime",
+   "birthyear = datetime.datetime(1994, 1, 5)",
+   "now = datetime.datetime(2026, 10, 22)",
+   "age = (now - birthyear).days // 365",
+   "before_birthday = (birthyear.month > now.month) or (birthyear.month == now.month and birthyear.day > now.day)",
+   "print((now.year - birthyear.year) - 1 if before_birthday else now.year - birthyear.year)"
+  ],
+  "notes": {
+   "2": "Date of birth: 5 January 1994.",
+   "3": "The original file calls datetime.datetime.now(); here it is fixed so the trace never changes.",
+   "4": "Subtracting gives a timedelta; // 365 estimates the years (leap days are ignored, and the file never prints this value).",
+   "5": "True when the birthday has not happened yet this year. January is month 1, October is 10, so the birthday already passed.",
+   "6": "Year difference 2026 - 1994 = 32; subtract 1 only if the birthday is still to come."
+  }
+ },
+ {
+  "id": "lastThursday",
+  "title": "Program: lastThursday.py",
+  "section": "Practice",
+  "blurb": "Practice program with today fixed at Monday 19 Oct 2026: step back to the most recent Thursday.",
+  "code": [
+   "import datetime",
+   "now = datetime.datetime(2026, 10, 19)",
+   "today_day = now.weekday()",
+   "if today_day - 3 >= 0:",
+   "    print((now - datetime.timedelta(days=(today_day - 3))).date())",
+   "else:",
+   "    print((now - datetime.timedelta(days=(7 - (3 - today_day)))).date())"
+  ],
+  "notes": {
+   "2": "Fixed to Monday 19 Oct 2026 (the original file uses now()).",
+   "3": "weekday() gives Monday 0 ... Sunday 6, so today_day is 0.",
+   "4": "Thursday is 3. Monday to Wednesday (0, 1, 2) give a negative number, so the else branch runs.",
+   "7": "Go back 7 - (3 - 0) = 4 days: Thursday 15 Oct 2026. .date() drops the time part."
+  }
+ },
+ {
+  "id": "startOftheday",
+  "title": "Program: startOftheday.py",
+  "section": "Practice",
+  "blurb": "Practice program: which months of 2021 start on a Monday? Watch the loop test each month.",
+  "code": [
+   "import datetime",
+   "year = 2021",
+   "monday = 0",
+   "for month in range(1, 13):",
+   "    dt = datetime.datetime(year, month, 1)",
+   "    if dt.weekday() == 0:",
+   "        monday += 1",
+   "        print(dt.date())"
+  ],
+  "notes": {
+   "2": "The year to check.",
+   "3": "Counter for months that start on a Monday.",
+   "4": "month takes the values 1 to 12, one loop turn each.",
+   "5": "The first day of this month as a datetime.",
+   "6": "weekday() == 0 means the 1st is a Monday.",
+   "7": "Count it.",
+   "8": "Print the date: only February, March and November 2021 start on a Monday."
+  }
+ }
+]
